@@ -1,0 +1,37 @@
+export const conversations = [
+  {
+    id: 'conv_001',
+    patientId: 'u001',
+    doctorId: 'd001',
+    doctorName: 'Dr. Arvind Rao',
+    initials: 'AR',
+    specialty: 'Neurology',
+    online: true,
+    startedAt: '2024-12-10T09:00:00',
+    messages: [
+      { id: 'msg_001', senderId: 'u001', senderType: 'patient', content: "Dr. Rao, I've been having headaches again since yesterday.", timestamp: '2024-12-15T10:30:00', read: true, type: 'text' },
+      { id: 'msg_002', senderId: 'd001', senderType: 'doctor', content: "Hello Meera, I'm sorry to hear that. Are the headaches similar to before, or different in character?", timestamp: '2024-12-15T11:00:00', read: true, type: 'text' },
+      { id: 'msg_003', senderId: 'u001', senderType: 'patient', content: 'Similar, but the aura lasts a bit longer this time.', timestamp: '2024-12-15T11:05:00', read: true, type: 'text' },
+      { id: 'msg_004', senderId: 'd001', senderType: 'doctor', content: "Thank you for the detail. Continue the Amitriptyline and let's review in our next session. If it worsens, please use the Sumatriptan as discussed.", timestamp: '2024-12-15T11:20:00', read: false, type: 'text' },
+    ],
+    lastMessage: 'Thank you for the detail. Continue the...',
+    lastMessageTime: '2024-12-15T11:20:00',
+    unreadCount: 2,
+  },
+  {
+    id: 'conv_002',
+    patientId: 'u001',
+    doctorId: 'd002',
+    doctorName: 'Dr. Priya Mehta',
+    initials: 'PM',
+    specialty: 'Cardiology',
+    online: false,
+    startedAt: '2024-12-08T14:00:00',
+    messages: [
+      { id: 'msg_010', senderId: 'd002', senderType: 'doctor', content: 'Your report looks good overall. Keep up with the morning walks.', timestamp: '2024-12-14T09:30:00', read: true, type: 'text' },
+    ],
+    lastMessage: 'Your report looks good overall. Keep up...',
+    lastMessageTime: '2024-12-14T09:30:00',
+    unreadCount: 0,
+  },
+];
