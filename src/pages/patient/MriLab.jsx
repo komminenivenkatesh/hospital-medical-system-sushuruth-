@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Box, Card, CardContent, Typography, Button, Chip, Grid, LinearProgress,
-  Alert, Stack, Avatar, IconButton, Divider, Tabs, Tab, Tooltip,
+  Alert, Stack, Avatar, IconButton, Divider, Tabs, Tab, Tooltip, TextField,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PageTransition from '../../components/PageTransition';
 import SmartImage from '../../components/SmartImage';
 import useStore from '../../store/useStore';
+import { mriAPI } from '../../services/api';
 import { tokens } from '../../theme/theme';
 import { scenes, doctorPhotos } from '../../data/assets';
 import { patient } from '../../data/appointments';
@@ -85,9 +86,11 @@ const scanHistory = [
 
 const scanTypes = [
   { label: 'Brain MRI', img: scenes.brain, desc: 'Tumors, lesions, aneurysms', color: '#2563EB' },
+  { label: 'Breast Mammography', img: scenes.article3, desc: 'Breast cancer screening', color: '#EC4899' },
+  { label: 'Blood Report', img: scenes.lab, desc: 'CBC, LFT, KFT, thyroid', color: '#7C3AED' },
+  { label: 'Spleen CT', img: scenes.lab, desc: '3D Spleen CT segmentation', color: '#0EA5E9' },
   { label: 'Cardiac MRI', img: scenes.heart, desc: 'Heart structure & function', color: '#EF4444' },
   { label: 'X-Ray', img: scenes.article1, desc: 'Bones, chest, abdomen', color: '#059669' },
-  { label: 'Blood Report', img: scenes.lab, desc: 'CBC, LFT, KFT, thyroid', color: '#7C3AED' },
   { label: 'Spine MRI', img: scenes.article3, desc: 'Disc herniation, cord', color: '#D97706' },
 ];
 
@@ -311,7 +314,7 @@ function DetailPanel({ scan, onClose }) {
               Download Report
             </Button>
             <Button fullWidth variant="outlined" startIcon={<ShareRoundedIcon />}>
-              Share with Doctor
+          Share with Doctor
             </Button>
           </Box>
         </CardContent>
@@ -324,30 +327,203 @@ export default function MriLab() {
   const isPro = useStore((s) => s.isPro);
   const upgrade = useStore((s) => s.upgradeToPro);
   const [activeTab, setActiveTab] = useState(0);
+  const [scans, setScans] = useState(scanHistory);
   const [selectedScan, setSelectedScan] = useState(scanHistory[0]);
   const [activeHotspot, setActiveHotspot] = useState('head');
   const [uploading, setUploading] = useState(false);
+  const [selectedScanType, setSelectedScanType] = useState('Brain MRI');
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [showBloodForm, setShowBloodForm] = useState(false);
+  const [bloodValues, setBloodValues] = useState({
+    wbc: '', rbc: '', hemoglobin: '', platelets: '', neutrophils: '', lymphocytes: '',
+  });
+  const fileInputRef = useRef(null);
+
+  const normalizeScan = (scan) => {
+    const name = scan.doctor || 'Dr. Arvind Rao';
+    const photo =
+      name.includes('Priya') ? doctorPhotos.priya
+        : name.includes('Rajesh') ? doctorPhotos.rajesh
+          : doctorPhotos.arvind;
+
+    return {
+      ...scan,
+      doctor: name,
+      doctorPhoto: scan.doctorPhoto || photo,
+      specialty: scan.specialty || 'Neurologist',
+      details: Array.isArray(scan.details) ? scan.details : [],
+      recommendations: Array.isArray(scan.recommendations) ? scan.recommendations : [],
+    };
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadHistory = async () => {
+      try {
+        const { data } = await mriAPI.getHistory();
+        if (!isMounted) return;
+
+        if (Array.isArray(data?.history)) {
+          const normalized = data.history.map(normalizeScan);
+          setScans(normalized);
+          setSelectedScan(normalized[0] || null);
+          setAnalysisResult(normalized[0] || null);
+        }
+      } catch (error) {
+        // Keep fallback local history if API fetch fails.
+        console.error('Failed to load MRI history:', error);
+      }
+    };
+
+    loadHistory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (!isPro) return <LockedView onUpgrade={upgrade} />;
 
-  const handleUpload = () => {
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/dicom', 'application/pdf', 'application/dicom'];
+  const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf', '.dcm', '.dicom'];
+  const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
+
+  const validateFile = (file) => {
+    if (!file) return 'No file selected.';
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    const typeOk = ALLOWED_TYPES.includes(file.type) || ALLOWED_EXTENSIONS.includes(ext);
+    if (!typeOk) return `Unsupported file type. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`;
+    if (file.size > MAX_SIZE) return 'File is too large. Maximum size is 50 MB.';
+    return null;
+  };
+
+  const handleFileSelect = (file, scanType) => {
+    setUploadError('');
+    const err = validateFile(file);
+    if (err) { setUploadError(err); return; }
+    setSelectedFile(file);
+    handleUpload(scanType || selectedScanType, file);
+  };
+
+  const openFilePicker = (scanType) => {
+    if (scanType) setSelectedScanType(scanType);
+    // Store the scan type so handleFileChange can access it
+    fileInputRef.current._scanType = scanType || selectedScanType;
+    fileInputRef.current.value = ''; // Reset so same file can be re-selected
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileSelect(file, fileInputRef.current._scanType);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileSelect(file);
+  };
+
+  const processAnalysisResponse = (data, scanType) => {
+    const analysis = data.analysis;
+    return normalizeScan({
+      id: `s${Date.now()}`,
+      date: new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }),
+      type: scanType,
+      status: 'Reviewed',
+      findings: analysis.findings,
+      doctor: 'Dr. Arvind Rao',
+      doctorPhoto: doctorPhotos.arvind,
+      specialty: scanType === 'Blood Report' ? 'Hematologist' : 'Neurologist',
+      confidence: analysis.confidence,
+      risk: analysis.risk,
+      severity: analysis.severity,
+      details: analysis.details,
+      recommendations: analysis.recommendations,
+    });
+  };
+
+  const handleUpload = async (scanType = selectedScanType, file) => {
     setUploading(true);
-    setTimeout(() => {
-      setUploading(false);
-      setSelectedScan(scanHistory[0]);
+    setUploadError('');
+    try {
+      // Use the new API: analyze(scanType, file, bloodData)
+      const { data } = await mriAPI.analyze(scanType, file, null);
+      const newScan = processAnalysisResponse(data, scanType);
+
+      setSelectedScan(newScan);
+      setAnalysisResult(newScan);
+      setScans((prev) => [newScan, ...prev]);
+      setSelectedFile(null);
       setActiveTab(0);
-    }, 2500);
+    } catch (error) {
+      console.error('MRI analysis failed:', error);
+      setUploadError('Failed to analyze scan. Please ensure the backend server is running and try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleBloodReportSubmit = async () => {
+    // Validate all blood values are filled
+    const fields = ['wbc', 'rbc', 'hemoglobin', 'platelets', 'neutrophils', 'lymphocytes'];
+    const missing = fields.filter((f) => !bloodValues[f] || isNaN(Number(bloodValues[f])));
+    if (missing.length > 0) {
+      setUploadError(`Please enter valid numbers for: ${missing.join(', ')}`);
+      return;
+    }
+
+    setUploading(true);
+    setUploadError('');
+    try {
+      const numericValues = {};
+      fields.forEach((f) => { numericValues[f] = parseFloat(bloodValues[f]); });
+
+      const { data } = await mriAPI.analyze('Blood Report', null, numericValues);
+      const newScan = processAnalysisResponse(data, 'Blood Report');
+
+      setSelectedScan(newScan);
+      setAnalysisResult(newScan);
+      setScans((prev) => [newScan, ...prev]);
+      setShowBloodForm(false);
+      setBloodValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '', neutrophils: '', lymphocytes: '' });
+      setActiveTab(0);
+    } catch (error) {
+      console.error('Blood report analysis failed:', error);
+      setUploadError('Failed to analyze blood report. Please ensure the backend server is running and try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleScanTypeClick = async (scanType) => {
+    setSelectedScanType(scanType);
+
+    // Blood Report needs a form, not file upload
+    if (scanType === 'Blood Report') {
+      setShowBloodForm(true);
+      setActiveTab(1);
+      return;
+    }
+
+    // For other scan types, open file picker
+    setShowBloodForm(false);
+    openFilePicker(scanType);
   };
 
   const handleHotspotClick = (hs) => {
     setActiveHotspot(hs.id);
-    const scan = scanHistory.find((s) => s.id === hs.scanId);
+    const scan = scans.find((s) => s.id === hs.scanId);
     if (scan) setSelectedScan(scan);
   };
 
   return (
     <PageTransition>
-      {/* Top tabs like reference */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
         <Box>
           <Typography sx={{ fontWeight: 800, fontSize: { xs: 22, md: 26 }, letterSpacing: '-0.02em' }}>
@@ -422,7 +598,7 @@ export default function MriLab() {
                     <IconButton size="small"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
                   </Box>
                   <Stack spacing={0}>
-                    {scanHistory.map((s, i) => {
+                    {scans.map((s, i) => {
                       const active = selectedScan?.id === s.id;
                       return (
                         <Box key={s.id} onClick={() => setSelectedScan(s)}
@@ -572,14 +748,100 @@ export default function MriLab() {
         </Grid>
       )}
 
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".jpg,.jpeg,.png,.pdf,.dcm,.dicom"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
       {/* ───── TAB 1: Upload ───── */}
       {activeTab === 1 && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          {uploadError && (
+            <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }} onClose={() => setUploadError('')}>
+              {uploadError}
+            </Alert>
+          )}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 8 }}>
-              {!uploading ? (
-                <Card onClick={handleUpload} sx={{ cursor: 'pointer', border: `2px dashed ${tokens.border}`, boxShadow: 'none',
-                  '&:hover': { borderColor: tokens.primary, bgcolor: tokens.primarySoft } }}>
+              {/* Blood Report Form */}
+              {showBloodForm ? (
+                <Card>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+                      <Box sx={{ width: 48, height: 48, borderRadius: 3, bgcolor: '#7C3AED18',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <BiotechOutlinedIcon sx={{ color: '#7C3AED', fontSize: 24 }} />
+                      </Box>
+                      <Box>
+                        <Typography sx={{ fontWeight: 800, fontSize: 18 }}>Blood Report Analysis</Typography>
+                        <Typography sx={{ fontSize: 12, color: tokens.textSecondary }}>
+                          Enter lab values for AI-powered analysis
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Grid container spacing={2}>
+                      {[
+                        { key: 'wbc', label: 'WBC (×10³/μL)', placeholder: 'e.g. 7.5', helper: 'Normal: 4.5-11.0' },
+                        { key: 'rbc', label: 'RBC (×10⁶/μL)', placeholder: 'e.g. 4.8', helper: 'Normal: 4.5-5.5' },
+                        { key: 'hemoglobin', label: 'Hemoglobin (g/dL)', placeholder: 'e.g. 14.0', helper: 'Normal: 12-17.5' },
+                        { key: 'platelets', label: 'Platelets (×10³/μL)', placeholder: 'e.g. 250', helper: 'Normal: 150-400' },
+                        { key: 'neutrophils', label: 'Neutrophils (%)', placeholder: 'e.g. 60', helper: 'Normal: 40-70' },
+                        { key: 'lymphocytes', label: 'Lymphocytes (%)', placeholder: 'e.g. 30', helper: 'Normal: 20-40' },
+                      ].map((field) => (
+                        <Grid key={field.key} size={{ xs: 6, md: 4 }}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            type="number"
+                            label={field.label}
+                            placeholder={field.placeholder}
+                            helperText={field.helper}
+                            value={bloodValues[field.key]}
+                            onChange={(e) => setBloodValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                    <Box sx={{ display: 'flex', gap: 1.5, mt: 3 }}>
+                      <Button
+                        variant="contained"
+                        size="large"
+                        onClick={handleBloodReportSubmit}
+                        disabled={uploading}
+                        startIcon={<AutoAwesomeIcon />}
+                        sx={{ flex: 1, py: 1.25 }}
+                      >
+                        {uploading ? 'Analyzing...' : 'Analyze Blood Report'}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="large"
+                        onClick={() => { setShowBloodForm(false); setUploadError(''); }}
+                        sx={{ px: 3 }}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ) : !uploading ? (
+                <Card
+                  onClick={() => openFilePicker()}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  sx={{ cursor: 'pointer',
+                    border: `2px dashed ${dragOver ? tokens.primary : tokens.border}`,
+                    boxShadow: 'none',
+                    bgcolor: dragOver ? tokens.primarySoft : 'transparent',
+                    transition: 'all 200ms ease',
+                    '&:hover': { borderColor: tokens.primary, bgcolor: tokens.primarySoft } }}
+                >
                   <CardContent sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, textAlign: 'center' }}>
                     <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
                       <Box sx={{ width: 80, height: 80, borderRadius: 4, bgcolor: tokens.primarySoft,
@@ -587,9 +849,11 @@ export default function MriLab() {
                         <UploadFileIcon sx={{ fontSize: 40, color: tokens.primary }} />
                       </Box>
                     </motion.div>
-                    <Typography sx={{ fontWeight: 800, fontSize: 20 }}>Drop your scan or report here</Typography>
+                    <Typography sx={{ fontWeight: 800, fontSize: 20 }}>
+                      {dragOver ? 'Drop your file here' : 'Click to upload or drag & drop'}
+                    </Typography>
                     <Typography sx={{ fontSize: 14, color: tokens.textSecondary }}>
-                      MRI, X-Ray, CT Scan, Blood Reports, Prescriptions
+                      MRI, X-Ray, CT Scan, Mammography scans
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                       {['DICOM', 'JPEG', 'PNG', 'PDF'].map((f) => (
@@ -629,7 +893,7 @@ export default function MriLab() {
               <Stack spacing={1.5}>
                 <Typography sx={{ fontWeight: 700, fontSize: 14, mb: 0.5 }}>Quick Upload</Typography>
                 {scanTypes.map((s) => (
-                  <Card key={s.label} sx={{ cursor: 'pointer', '&:hover': { borderColor: s.color } }} onClick={handleUpload}>
+                  <Card key={s.label} sx={{ cursor: 'pointer', '&:hover': { borderColor: s.color } }} onClick={() => handleScanTypeClick(s.label)}>
                     <CardContent sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, '&:last-child': { pb: 1.5 } }}>
                       <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: `${s.color}15`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -655,7 +919,7 @@ export default function MriLab() {
       {activeTab === 2 && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <Stack spacing={1.5}>
-            {scanHistory.map((s) => {
+            {scans.map((s) => {
               const riskColor = s.risk === 'Low' ? tokens.success : s.risk === 'Medium' ? tokens.warning : tokens.danger;
               return (
                 <Card key={s.id} sx={{ cursor: 'pointer', '&:hover': { borderColor: tokens.primary } }}

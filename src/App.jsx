@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createAppTheme } from './theme/theme';
 import useStore from './store/useStore';
@@ -49,6 +50,30 @@ import Verification from './pages/admin/Verification';
 import Analytics from './pages/admin/Analytics';
 import Moderation from './pages/admin/Moderation';
 
+function ProtectedRoute({ children, allowedRoles }) {
+  const { isAuthenticated, loading, user } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    const dashboardPaths = { patient: '/dashboard', doctor: '/doctor/dashboard', admin: '/admin' };
+    return <Navigate to={dashboardPaths[user?.role] || '/dashboard'} replace />;
+  }
+
+  return children;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
   return (
@@ -58,12 +83,12 @@ function AnimatedRoutes() {
         <Route path="/login" element={<Login />} />
 
         {/* Full-screen pages (no shell) */}
-        <Route path="/consult/:id" element={<ConsultRoom />} />
-        <Route path="/doctor/consult/:id" element={<DoctorConsultRoom />} />
-        <Route path="/ai" element={<AiAssistant />} />
+        <Route path="/consult/:id" element={<ProtectedRoute><ConsultRoom /></ProtectedRoute>} />
+        <Route path="/doctor/consult/:id" element={<ProtectedRoute allowedRoles={['doctor']}><DoctorConsultRoom /></ProtectedRoute>} />
+        <Route path="/ai" element={<ProtectedRoute><AiAssistant /></ProtectedRoute>} />
 
         {/* Patient */}
-        <Route element={<AppShell />}>
+        <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/find-doctors" element={<FindDoctors />} />
           <Route path="/doctors/:id" element={<DoctorProfile />} />
@@ -85,7 +110,7 @@ function AnimatedRoutes() {
         </Route>
 
         {/* Doctor */}
-        <Route element={<DoctorShell />}>
+        <Route element={<ProtectedRoute allowedRoles={['doctor']}><DoctorShell /></ProtectedRoute>}>
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/patients" element={<DoctorPatients />} />
           <Route path="/doctor/mri-review/:id" element={<MriReview />} />
@@ -95,7 +120,7 @@ function AnimatedRoutes() {
         </Route>
 
         {/* Admin */}
-        <Route element={<AdminShell />}>
+        <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminShell /></ProtectedRoute>}>
           <Route path="/admin" element={<AdminOverview />} />
           <Route path="/admin/verification" element={<Verification />} />
           <Route path="/admin/analytics" element={<Analytics />} />
@@ -146,7 +171,9 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <ThemedApp />
+            <AuthProvider>
+              <ThemedApp />
+            </AuthProvider>
           </motion.div>
         )}
       </AnimatePresence>

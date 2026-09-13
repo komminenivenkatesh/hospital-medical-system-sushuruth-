@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { doctors as seedDoctors } from '../data/doctors';
 import { patient as seedPatient } from '../data/appointments';
 import { conversations as seedConversations } from '../data/conversations';
+import { doctorAPI, appointmentAPI, chatAPI } from '../services/api';
 
 const initialNotifications = [
   { id: 'n1', type: 'appointment', title: 'Appointment Reminder', body: 'Your video call with Dr. Arvind Rao is in 2 hours', time: '9:00 AM', read: false, icon: 'calendar' },
@@ -74,6 +75,110 @@ const useStore = create((set, get) => ({
         };
       }),
     })),
+
+  // ---- API-backed async actions ----
+  doctorsLoading: false,
+  doctorsError: null,
+  fetchDoctors: async (filters = {}) => {
+    set({ doctorsLoading: true, doctorsError: null });
+    try {
+      const { data } = await doctorAPI.getAll(filters);
+      const mapped = data.map((d) => ({
+        id: d._id,
+        name: d.user?.name || 'Unknown',
+        email: d.user?.email,
+        phone: d.user?.phone,
+        avatar: d.user?.avatar,
+        initials: (d.user?.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2),
+        specialty: d.specialty,
+        experience: d.experienceYears,
+        rating: d.rating,
+        consultationFee: d.consultationFee,
+        videoFee: d.consultationFee,
+        availableToday: d.availableToday,
+        status: d.status,
+        verified: true,
+        ...d,
+      }));
+      set({ doctors: mapped.length > 0 ? mapped : get().doctors, doctorsLoading: false });
+    } catch (err) {
+      console.warn('Failed to fetch doctors from API, using local data:', err.message);
+      set({ doctorsLoading: false, doctorsError: err.message });
+    }
+  },
+
+  appointmentsData: [],
+  appointmentsLoading: false,
+  fetchAppointments: async (filters = {}) => {
+    set({ appointmentsLoading: true });
+    try {
+      const { data } = await appointmentAPI.getAll(filters);
+      set({ appointmentsData: data, appointmentsLoading: false });
+    } catch (err) {
+      console.warn('Failed to fetch appointments:', err.message);
+      set({ appointmentsLoading: false });
+    }
+  },
+
+  bookAppointment: async (appointmentData) => {
+    const { data } = await appointmentAPI.book(appointmentData);
+    return data;
+  },
+
+  updateAppointmentStatus: async (id, status) => {
+    const { data } = await appointmentAPI.updateStatus(id, status);
+    set((s) => ({
+      appointmentsData: s.appointmentsData.map((a) => a._id === id ? { ...a, status } : a),
+    }));
+    return data;
+  },
+
+  apiConversations: [],
+  conversationsLoading: false,
+  fetchConversations: async () => {
+    set({ conversationsLoading: true });
+    try {
+      const { data } = await chatAPI.getConversations();
+      set({ apiConversations: data, conversationsLoading: false });
+    } catch (err) {
+      console.warn('Failed to fetch conversations:', err.message);
+      set({ conversationsLoading: false });
+    }
+  },
+
+  apiMessages: [],
+  messagesLoading: false,
+  fetchMessages: async (conversationId) => {
+    set({ messagesLoading: true });
+    try {
+      const { data } = await chatAPI.getMessages(conversationId);
+      set({ apiMessages: data.messages || data, messagesLoading: false });
+    } catch (err) {
+      console.warn('Failed to fetch messages:', err.message);
+      set({ messagesLoading: false });
+    }
+  },
+
+  sendApiMessage: async (conversationId, content) => {
+    try {
+      const { data } = await chatAPI.sendMessage(conversationId, content);
+      return data;
+    } catch (err) {
+      console.warn('Failed to send message via API:', err.message);
+      throw err;
+    }
+  },
+
+  updateDoctorStatusAPI: async (status, availableToday) => {
+    try {
+      const { data } = await doctorAPI.updateStatus({ status, availableToday });
+      set({ doctorStatus: status });
+      return data;
+    } catch (err) {
+      console.warn('Failed to update doctor status:', err.message);
+      set({ doctorStatus: status });
+    }
+  },
 
   // ---- Booking draft ----
   booking: { type: null, date: null, slot: null, reason: '', shareHistory: true },

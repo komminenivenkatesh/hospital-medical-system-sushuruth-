@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Box, Typography, TextField, Button, Divider, Paper, Avatar, Chip } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, TextField, Button, Divider, Paper, Avatar, Chip, CircularProgress, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import MedicalServicesRoundedIcon from '@mui/icons-material/MedicalServicesRounded';
@@ -8,6 +8,7 @@ import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSetting
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import Logo from '../../components/Logo';
+import { useAuth } from '../../context/AuthContext';
 
 const features = [
   'AI-powered symptom analysis & specialist matching',
@@ -27,10 +28,60 @@ const roles = [
   { label: 'Admin',    icon: AdminPanelSettingsRoundedIcon,  path: '/admin',             color: '#7C3AED', desc: 'Platform administration' },
 ];
 
+const rolePaths = {
+  patient: '/dashboard',
+  doctor: '/doctor/dashboard',
+  admin: '/admin',
+};
+
 export default function Login() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, user } = useAuth();
   const [activeRole, setActiveRole] = useState(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role) {
+      navigate(rolePaths[user.role] || '/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleLogin = async (targetPath) => {
+    setError('');
+    setLoading(true);
+    try {
+      const userData = await login(email, password);
+      const nextPath = targetPath || rolePaths[userData.role] || '/dashboard';
+      navigate(nextPath, { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (role, path) => {
+    setError('');
+    setLoading(true);
+    const demoCredentials = {
+      Patient: { email: 'meera@example.com', password: 'password123' },
+      Doctor: { email: 'arvind@example.com', password: 'password123' },
+      Admin: { email: 'admin@neurocare.com', password: 'password123' },
+    };
+    const creds = demoCredentials[role];
+    try {
+      await login(creds.email, creds.password);
+      navigate(path, { replace: true });
+    } catch (err) {
+      setError(`Demo login failed for ${role}. Run 'npm run seed' to create demo accounts.`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -198,11 +249,14 @@ export default function Login() {
           </Typography>
 
           {/* Form */}
+          {error && <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }} onClose={() => setError('')}>{error}</Alert>}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
               fullWidth
               label="Phone or Email"
-              defaultValue="meera@example.com"
+              placeholder="e.g. name@example.com or phone"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               size="medium"
               InputProps={{
                 sx: { borderRadius: '12px', bgcolor: '#fff', fontSize: 15 },
@@ -212,7 +266,9 @@ export default function Login() {
               fullWidth
               label="Password"
               type="password"
-              defaultValue="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               size="medium"
               InputProps={{
                 sx: { borderRadius: '12px', bgcolor: '#fff', fontSize: 15 },
@@ -228,7 +284,8 @@ export default function Login() {
               fullWidth
               variant="contained"
               size="large"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => handleLogin()}
+              disabled={loading}
               sx={{
                 py: 1.75,
                 fontSize: 15,
@@ -243,56 +300,8 @@ export default function Login() {
                 transition: 'all 250ms ease',
               }}
             >
-              Sign In
+              {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
             </Button>
-          </Box>
-
-          <Divider sx={{ my: 3, fontSize: 13, color: '#9CA3AF' }}>or continue as</Divider>
-
-          {/* Role cards */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {roles.map((r) => {
-              const Icon = r.icon;
-              const isSelected = activeRole === r.label;
-              return (
-                <motion.div
-                  key={r.label}
-                  whileHover={{ scale: 1.015 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                >
-                  <Paper
-                    onClick={() => { setActiveRole(r.label); setTimeout(() => navigate(r.path), 160); }}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 2,
-                      p: 2,
-                      border: `1.5px solid ${isSelected ? r.color : '#E5E7EB'}`,
-                      borderRadius: '14px',
-                      cursor: 'pointer',
-                      bgcolor: isSelected ? `${r.color}08` : '#fff',
-                      boxShadow: isSelected ? `0 4px 16px ${r.color}25` : 'none',
-                      transition: 'all 200ms ease',
-                      '&:hover': {
-                        borderColor: r.color,
-                        bgcolor: `${r.color}06`,
-                        boxShadow: `0 2px 12px ${r.color}20`,
-                      },
-                    }}
-                  >
-                    <Box sx={{ width: 42, height: 42, borderRadius: '10px', bgcolor: `${r.color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon sx={{ fontSize: 22, color: r.color }} />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography sx={{ fontWeight: 700, fontSize: 14, color: '#111827' }}>{r.label}</Typography>
-                      <Typography sx={{ fontSize: 12, color: '#6B7280' }}>{r.desc}</Typography>
-                    </Box>
-                    {isSelected && <CheckCircleRoundedIcon sx={{ color: r.color, fontSize: 20 }} />}
-                  </Paper>
-                </motion.div>
-              );
-            })}
           </Box>
 
           {/* Footer */}

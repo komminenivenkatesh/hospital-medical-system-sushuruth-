@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 import {
   Box, Typography, IconButton, Badge, Avatar, Menu, MenuItem, ListItemIcon,
   Divider, Popover, List, ListItemButton, ListItemText, ListItemAvatar,
@@ -70,6 +71,8 @@ export default function TopNav() {
   const [searchQ, setSearchQ] = useState('');
   const searchRef = useRef(null);
 
+  const { user: authUser, logout, isAuthenticated } = useAuth();
+  const patient         = useStore((s) => s.patient);
   const notifications   = useStore((s) => s.notifications);
   const unreadCount     = useStore((s) => s.unreadCount);
   const markNotificationRead = useStore((s) => s.markNotificationRead);
@@ -447,14 +450,16 @@ export default function TopNav() {
             }}
           >
             <Avatar
-              src={patientPhotos.meera}
               sx={{
                 width: 28, height: 28,
                 border: `2px solid ${t.primary}40`,
+                fontSize: 12,
               }}
-            />
+            >
+              {authUser?.name ? authUser.name.split(' ').map(w => w[0]).join('').slice(0, 2) : (patient?.initials || 'U')}
+            </Avatar>
             <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-              <Typography sx={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.1, color: textColor }}>Meera</Typography>
+              <Typography sx={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.1, color: textColor }}>{authUser?.name || patient?.name || 'User'}</Typography>
             </Box>
             <KeyboardArrowDownRoundedIcon sx={{ fontSize: 16, color: mutedColor }} />
           </Box>
@@ -480,9 +485,11 @@ export default function TopNav() {
             }}
           >
             <Box sx={{ px: 2, py: 1.75, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Avatar src={patientPhotos.meera} sx={{ width: 36, height: 36, border: `2px solid ${t.primary}30` }} />
+              <Avatar sx={{ width: 36, height: 36, border: `2px solid ${t.primary}30`, fontSize: 14 }}>
+                {authUser?.name ? authUser.name.split(' ').map(w => w[0]).join('').slice(0, 2) : (patient?.initials || 'U')}
+              </Avatar>
               <Box>
-                <Typography sx={{ fontWeight: 800, fontSize: 14, color: textColor }}>Meera Sharma</Typography>
+                <Typography sx={{ fontWeight: 800, fontSize: 14, color: textColor }}>{authUser?.name || patient?.name || 'User'}</Typography>
                 <Typography sx={{ fontSize: 11.5, color: mutedColor }}>
                   {isPro ? '✦ Pro plan' : 'Free plan'} · Pune
                 </Typography>
@@ -505,7 +512,7 @@ export default function TopNav() {
               Payments & Billing
             </MenuItem>
             <Divider sx={{ borderColor: dark ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }} />
-            <MenuItem onClick={() => { setAnchor(null); navigate('/login'); }}
+            <MenuItem onClick={() => { setAnchor(null); logout(); navigate('/login'); }}
               sx={{ py: 1.25, fontSize: 14, color: t.danger, '&:hover': { bgcolor: t.dangerSoft } }}>
               <ListItemIcon><LogoutRoundedIcon fontSize="small" sx={{ color: t.danger }} /></ListItemIcon>
               Sign out

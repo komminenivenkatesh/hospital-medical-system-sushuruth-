@@ -1,11 +1,12 @@
-import { Box, Avatar, Typography } from '@mui/material';
+import { Box, Avatar, Typography, Divider } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
 import GppMaybeOutlinedIcon from '@mui/icons-material/GppMaybeOutlined';
 import ShieldRoundedIcon from '@mui/icons-material/ShieldRounded';
-import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import { useAuth } from '../context/AuthContext';
 import { tokens } from '../theme/theme';
 
 const items = [
@@ -18,6 +19,12 @@ const items = [
 export default function AdminShell() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: tokens.canvas }}>
@@ -64,20 +71,45 @@ export default function AdminShell() {
           })}
         </Box>
 
-        {/* Switch to patient app */}
-        <Box onClick={() => navigate('/dashboard')}
-          sx={{ display: 'flex', alignItems: 'center', gap: 1.25, px: 1.5, py: 1, mb: 1, borderRadius: '12px', cursor: 'pointer',
-            color: tokens.textSecondary, '&:hover': { bgcolor: tokens.surfaceMuted } }}>
-          <SwapHorizRoundedIcon sx={{ fontSize: 18 }} />
-          <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Patient App</Typography>
-        </Box>
+        <Box sx={{ borderTop: `1px solid ${tokens.border}`, pt: 1.5, mt: 0.5 }}>
+          <Box
+            onClick={() => navigate('/admin')}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.25,
+              p: 1.25,
+              borderRadius: '12px',
+              bgcolor: pathname === '/admin' ? tokens.primarySoft : tokens.surfaceMuted,
+              cursor: 'pointer',
+              '&:hover': { bgcolor: tokens.surfaceMuted },
+            }}
+          >
+            <Avatar sx={{ width: 36, height: 36, bgcolor: tokens.textPrimary, fontSize: 12, fontWeight: 700 }}>AD</Avatar>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 13, lineHeight: 1.2 }}>{user?.name || 'Admin'}</Typography>
+              <Typography sx={{ fontSize: 11, color: tokens.textTertiary }}>{user?.role || 'Platform Ops'}</Typography>
+            </Box>
+          </Box>
 
-        {/* Admin card */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: '12px', bgcolor: tokens.surfaceMuted }}>
-          <Avatar sx={{ width: 36, height: 36, bgcolor: tokens.textPrimary, fontSize: 12, fontWeight: 700 }}>AD</Avatar>
-          <Box>
-            <Typography sx={{ fontWeight: 700, fontSize: 13, lineHeight: 1.2 }}>Admin</Typography>
-            <Typography sx={{ fontSize: 11, color: tokens.textTertiary }}>Platform Ops</Typography>
+          <Divider sx={{ my: 1.25, borderColor: tokens.border }} />
+
+          <Box
+            onClick={handleLogout}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.25,
+              px: 1.25,
+              py: 0.9,
+              borderRadius: '10px',
+              cursor: 'pointer',
+              color: tokens.textSecondary,
+              '&:hover': { bgcolor: tokens.surfaceMuted },
+            }}
+          >
+            <LogoutRoundedIcon sx={{ fontSize: 18 }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Logout</Typography>
           </Box>
         </Box>
       </Box>
