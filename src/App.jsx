@@ -13,6 +13,7 @@ import AdminShell from './layout/AdminShell';
 
 // Auth
 import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
 
 // Patient
 import Dashboard from './pages/patient/Dashboard';
@@ -50,6 +51,9 @@ import Verification from './pages/admin/Verification';
 import Analytics from './pages/admin/Analytics';
 import Moderation from './pages/admin/Moderation';
 
+// Hospital
+import HospitalDashboard from './pages/hospital/Dashboard';
+
 function ProtectedRoute({ children, allowedRoles }) {
   const { isAuthenticated, loading, user } = useAuth();
   const location = useLocation();
@@ -67,7 +71,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    const dashboardPaths = { patient: '/dashboard', doctor: '/doctor/dashboard', admin: '/admin' };
+    const dashboardPaths = { patient: '/dashboard', doctor: '/doctor/dashboard', admin: '/admin', hospital: '/hospital/dashboard' };
     return <Navigate to={dashboardPaths[user?.role] || '/dashboard'} replace />;
   }
 
@@ -81,11 +85,13 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
         {/* Full-screen pages (no shell) */}
         <Route path="/consult/:id" element={<ProtectedRoute><ConsultRoom /></ProtectedRoute>} />
         <Route path="/doctor/consult/:id" element={<ProtectedRoute allowedRoles={['doctor']}><DoctorConsultRoom /></ProtectedRoute>} />
         <Route path="/ai" element={<ProtectedRoute><AiAssistant /></ProtectedRoute>} />
+        <Route path="/hospital/dashboard" element={<ProtectedRoute allowedRoles={['hospital']}><HospitalDashboard /></ProtectedRoute>} />
 
         {/* Patient */}
         <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>

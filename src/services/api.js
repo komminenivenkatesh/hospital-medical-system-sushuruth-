@@ -43,6 +43,17 @@ export const doctorAPI = {
   getAll: (params = {}) => api.get('/doctors', { params }),
   getById: (id) => api.get(`/doctors/${id}`),
   updateStatus: (data) => api.patch('/doctors/status', data),
+  getVerifications: (params = {}) => api.get('/doctors/verifications', { params }),
+  verifyDoctor: (id, verificationStatus) => api.patch(`/doctors/${id}/verify`, { verificationStatus }),
+};
+
+// ---- Hospital API ----
+export const hospitalAPI = {
+  getAll: (params = {}) => api.get('/hospitals', { params }),
+  getById: (id) => api.get(`/hospitals/${id}`),
+  getVerifications: (params = {}) => api.get('/hospitals/verifications', { params }),
+  verifyHospital: (id, verificationStatus) => api.patch(`/hospitals/${id}/verify`, { verificationStatus }),
+  updateMyHospital: (data) => api.patch('/hospitals/me', data),
 };
 
 // ---- Appointment API ----

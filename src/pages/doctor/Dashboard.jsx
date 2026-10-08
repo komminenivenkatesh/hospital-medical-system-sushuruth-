@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import PageTransition from '../../components/PageTransition';
 import SectionCard from '../../components/SectionCard';
 import useStore from '../../store/useStore';
+import { useAuth } from '../../context/AuthContext';
 import { tokens } from '../../theme/theme';
 import { patientPhotos } from '../../data/assets';
 
@@ -41,18 +42,51 @@ const stats = [
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const status = useStore((s) => s.doctorStatus);
   const setStatus = useStore((s) => s.setDoctorStatus);
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
+  const docName = user?.name || 'Dr. Arvind Rao';
+  const docSpecialty = user?.doctorProfile?.specialty || 'Neurologist';
+  const docHospital = user?.doctorProfile?.hospital || 'Apollo Hospital';
+  const verificationStatus = user?.doctorProfile?.verificationStatus || 'Approved';
+
   return (
     <PageTransition>
+      {verificationStatus === 'Pending' && (
+        <Card
+          elevation={0}
+          sx={{
+            p: 2.5,
+            mb: 3,
+            bgcolor: '#FFFBEB',
+            border: '1px solid #FDE68A',
+            borderRadius: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <VerifiedRoundedIcon sx={{ color: '#D97706', fontSize: 32 }} />
+          <Box sx={{ flex: 1 }}>
+            <Typography sx={{ fontWeight: 800, fontSize: 15, color: '#92400E' }}>
+              Application Under Administrative Review
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#B45309' }}>
+              Your medical registration {user?.doctorProfile?.licenseNumber ? `(${user?.doctorProfile?.licenseNumber})` : ''} is currently being verified by the medical board. You will be available for patient appointments as soon as verification is approved.
+            </Typography>
+          </Box>
+          <Chip label="Pending Approval" size="small" sx={{ bgcolor: '#FDE68A', color: '#92400E', fontWeight: 700 }} />
+        </Card>
+      )}
+
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Box>
           <Typography sx={{ fontWeight: 800, fontSize: { xs: 24, md: 28 }, letterSpacing: '-0.02em' }}>
-            Good morning, Dr. Arvind Rao
+            Good morning, {docName}
           </Typography>
-          <Typography sx={{ fontSize: 13, color: tokens.textSecondary }}>Neurologist · Apollo Hospital · {today}</Typography>
+          <Typography sx={{ fontSize: 13, color: tokens.textSecondary }}>{docSpecialty} · {docHospital} · {today}</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Select value={status} onChange={(e) => setStatus(e.target.value)} size="small"

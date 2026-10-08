@@ -31,6 +31,7 @@ const doctorRoutes = require('./routes/doctorRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const mriRoutes = require('./routes/mriRoutes');
+const hospitalRoutes = require('./routes/hospitalRoutes');
 
 // Error handling middleware
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
@@ -81,6 +82,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/mri', mriRoutes);
+app.use('/api/hospitals', hospitalRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {

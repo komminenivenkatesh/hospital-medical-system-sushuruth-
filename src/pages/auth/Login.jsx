@@ -32,6 +32,7 @@ const rolePaths = {
   patient: '/dashboard',
   doctor: '/doctor/dashboard',
   admin: '/admin',
+  hospital: '/hospital/dashboard',
 };
 
 export default function Login() {
@@ -70,6 +71,7 @@ export default function Login() {
     const demoCredentials = {
       Patient: { email: 'meera@example.com', password: 'password123' },
       Doctor: { email: 'arvind@example.com', password: 'password123' },
+      Hospital: { email: 'admin@apollohyderabad.com', password: 'password123' },
       Admin: { email: 'admin@neurocare.com', password: 'password123' },
     };
     const creds = demoCredentials[role];
@@ -302,6 +304,65 @@ export default function Login() {
             >
               {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
             </Button>
+
+            <Box sx={{ textAlign: 'center', mt: 1 }}>
+              <Typography sx={{ fontSize: 14, color: '#6B7280' }}>
+                Don't have an account?{' '}
+                <Typography
+                  component="span"
+                  onClick={() => navigate('/signup')}
+                  sx={{
+                    color: '#0F52BA',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    '&:hover': { textDecoration: 'underline' },
+                  }}
+                >
+                  Sign Up
+                </Typography>
+              </Typography>
+            </Box>
+
+            <Divider sx={{ my: 1 }}>
+              <Typography sx={{ fontSize: 11, color: '#9CA3AF', fontWeight: 700, letterSpacing: '0.05em' }}>
+                QUICK DEMO ACCESS
+              </Typography>
+            </Divider>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => handleDemoLogin('Patient', '/dashboard')}
+                sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700, fontSize: 13, borderColor: '#BFDBFE', color: '#1E40AF' }}
+              >
+                👤 Patient Demo
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => handleDemoLogin('Doctor', '/doctor/dashboard')}
+                sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700, fontSize: 13, borderColor: '#99F6E4', color: '#0F766E' }}
+              >
+                🩺 Doctor Demo
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => handleDemoLogin('Hospital', '/hospital/dashboard')}
+                sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700, fontSize: 13, borderColor: '#DDD6FE', color: '#6D28D9' }}
+              >
+                🏥 Hospital Demo
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => handleDemoLogin('Admin', '/admin')}
+                sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700, fontSize: 13, borderColor: '#E5E7EB', color: '#374151' }}
+              >
+                🛡 Admin Demo
+              </Button>
+            </Box>
           </Box>
 
           {/* Footer */}

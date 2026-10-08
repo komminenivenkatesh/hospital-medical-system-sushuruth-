@@ -9,6 +9,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 // Adjust paths to your actual model files if necessary
 const User = require('./models/User');
 const Doctor = require('./models/Doctor');
+const Hospital = require('./models/Hospital');
 const Appointment = require('./models/Appointment');
 const Conversation = require('./models/Conversation');
 const Message = require('./models/Message');
@@ -27,6 +28,7 @@ const seedDatabase = async () => {
     
     await User.deleteMany();
     await Doctor.deleteMany();
+    await Hospital.deleteMany();
     await Appointment.deleteMany();
     await Conversation.deleteMany();
     await Message.deleteMany();
@@ -73,17 +75,74 @@ const seedDatabase = async () => {
     console.log('⏳ Creating doctor profiles...');
 
     const doctorProfiles = [
-      { user: createdDoctors[0]._id, specialty: 'Neurology', experienceYears: 12, rating: 4.8, consultationFee: 600, availableToday: true, status: 'Available' },
-      { user: createdDoctors[1]._id, specialty: 'Cardiology', experienceYears: 8, rating: 4.9, consultationFee: 700, availableToday: true, status: 'Available' },
-      { user: createdDoctors[2]._id, specialty: 'General Physician', experienceYears: 15, rating: 4.6, consultationFee: 200, availableToday: true, status: 'Available' },
-      { user: createdDoctors[3]._id, specialty: 'Psychiatry', experienceYears: 10, rating: 4.9, consultationFee: 500, availableToday: false, status: 'Offline' },
-      { user: createdDoctors[4]._id, specialty: 'Dermatology', experienceYears: 6, rating: 4.5, consultationFee: 400, availableToday: true, status: 'Available' },
-      { user: createdDoctors[5]._id, specialty: 'Pediatrician', experienceYears: 9, rating: 4.7, consultationFee: 450, availableToday: true, status: 'Available' }
+      { user: createdDoctors[0]._id, specialty: 'Neurology', experienceYears: 12, rating: 4.8, consultationFee: 600, availableToday: true, status: 'Available', verificationStatus: 'Approved', licenseNumber: 'MCI-2012-4011', hospital: 'Apollo Hospital, Hyderabad' },
+      { user: createdDoctors[1]._id, specialty: 'Cardiology', experienceYears: 8, rating: 4.9, consultationFee: 700, availableToday: true, status: 'Available', verificationStatus: 'Approved', licenseNumber: 'MCI-2016-8922', hospital: 'Fortis Hospital, Mumbai' },
+      { user: createdDoctors[2]._id, specialty: 'General Physician', experienceYears: 15, rating: 4.6, consultationFee: 200, availableToday: true, status: 'Available', verificationStatus: 'Approved', licenseNumber: 'MCI-2009-1234', hospital: 'City Hospital, Delhi' },
+      { user: createdDoctors[3]._id, specialty: 'Psychiatry', experienceYears: 10, rating: 4.9, consultationFee: 500, availableToday: false, status: 'Offline', verificationStatus: 'Approved', licenseNumber: 'MCI-2014-5544', hospital: 'NIMHANS, Bangalore' },
+      { user: createdDoctors[4]._id, specialty: 'Dermatology', experienceYears: 6, rating: 4.5, consultationFee: 400, availableToday: true, status: 'Available', verificationStatus: 'Approved', licenseNumber: 'MCI-2018-9901', hospital: 'Skin Care Clinic, Hyderabad' },
+      { user: createdDoctors[5]._id, specialty: 'Pediatrician', experienceYears: 9, rating: 4.7, consultationFee: 450, availableToday: true, status: 'Available', verificationStatus: 'Approved', licenseNumber: 'MCI-2015-3321', hospital: "Rainbow Children's Hospital" }
     ];
 
     const createdDocProfiles = await Doctor.insertMany(doctorProfiles);
     
     console.log('✅ Doctor profiles created.');
+
+    console.log('⏳ Creating hospital profiles...');
+
+    // Hospital Admin User
+    const hospitalAdmin = await User.create({
+      name: 'Apollo Medical Administration',
+      email: 'admin@apollohyderabad.com',
+      password: 'password123',
+      role: 'hospital',
+      phone: '+91 40 2360 7777'
+    });
+
+    const hospitalCareAdmin = await User.create({
+      name: 'Care Hospital Operations',
+      email: 'admin@carehospitals.com',
+      password: 'password123',
+      role: 'hospital',
+      phone: '+91 40 6165 6565'
+    });
+
+    const sampleHospitals = [
+      {
+        user: hospitalAdmin._id,
+        name: 'Apollo Hospitals, Jubilee Hills',
+        type: 'Multi-Specialty',
+        licenseNumber: 'CEA-TS-2015-0812',
+        city: 'Hyderabad, Telangana',
+        address: 'Road No 72, Film Nagar, Jubilee Hills',
+        totalBeds: 350,
+        availableBeds: 42,
+        facilities: ['24/7 Emergency', 'ICU Facilities', 'Advanced MRI', 'In-house Pharmacy', 'Blood Bank', 'Ambulance'],
+        rating: 4.8,
+        reviews: '2.4k',
+        price: '₹120',
+        waitMinutes: 15,
+        verificationStatus: 'Approved'
+      },
+      {
+        user: hospitalCareAdmin._id,
+        name: 'Care Super Specialty Hospital',
+        type: 'Super-Specialty',
+        licenseNumber: 'CEA-TS-2024-9102',
+        city: 'Banjara Hills, Hyderabad',
+        address: 'Road No 1, Banjara Hills',
+        totalBeds: 220,
+        availableBeds: 28,
+        facilities: ['24/7 Emergency', 'ICU Facilities', 'Cath Lab', 'Blood Bank'],
+        rating: 4.6,
+        reviews: '950',
+        price: '₹100',
+        waitMinutes: 20,
+        verificationStatus: 'Pending'
+      }
+    ];
+
+    await Hospital.insertMany(sampleHospitals);
+    console.log('✅ Hospital profiles created.');
 
     console.log('⏳ Creating appointments...');
 

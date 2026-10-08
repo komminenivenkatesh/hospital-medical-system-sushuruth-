@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Card, Button, Stack } from '@mui/material';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
@@ -12,8 +13,9 @@ import PageTransition from '../../components/PageTransition';
 import SmartImage from '../../components/SmartImage';
 import { scenes } from '../../data/assets';
 import { tokens } from '../../theme/theme';
+import { hospitalAPI } from '../../services/api';
 
-const hospitals = [
+const initialHospitals = [
   { name: 'Apollo Hospitals', city: 'HYDERABAD, TELANGANA, INDIA', rating: 4.8, type: 'Multi-Specialty', img: scenes.lab, price: '₹110', distance: '56KM', availability: 'Wait: ~15m', reviews: '1.3k' },
   { name: 'Fortis Hospital', city: 'MUMBAI, MAHARASHTRA, INDIA', rating: 4.7, type: 'Super-Specialty', img: scenes.heart, price: '₹85', distance: '12KM', availability: 'Open 24/7', reviews: '2.1k' },
   { name: 'AIIMS New Delhi', city: 'NEW DELHI, NCR, INDIA', rating: 4.9, type: 'Academic Medical Centre', img: scenes.wellness, price: '₹150', distance: '8KM', availability: 'Open 24/7', reviews: '5.6k' },
@@ -24,6 +26,29 @@ const hospitals = [
 
 export default function Hospitals() {
   const navigate = useNavigate();
+  const [list, setList] = useState(initialHospitals);
+
+  useEffect(() => {
+    hospitalAPI.getAll()
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const mapped = data.map((d) => ({
+            name: d.name,
+            city: d.city?.toUpperCase() || 'HYDERABAD, TELANGANA, INDIA',
+            rating: d.rating || 4.8,
+            type: d.type || 'Multi-Specialty',
+            img: d.img || scenes.lab,
+            price: d.price || '₹100',
+            distance: d.distance || '15KM',
+            availability: `Wait: ~${d.waitMinutes || 15}m`,
+            reviews: d.reviews || '1.1k',
+            _id: d._id,
+          }));
+          setList(mapped);
+        }
+      })
+      .catch((err) => console.warn('Could not fetch hospitals from API, using default list:', err.message));
+  }, []);
 
   return (
     <PageTransition>
@@ -38,7 +63,7 @@ export default function Hospitals() {
         </Box>
 
         <Stack spacing={3}>
-          {hospitals.map((h, i) => (
+          {list.map((h, i) => (
             <Card key={i} onClick={() => navigate('/hospitals/1')}
               sx={{ 
                 display: 'flex',

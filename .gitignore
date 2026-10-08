@@ -40,3 +40,6 @@ backend/uploads/*
 *.sln
 *.sw?
 
+# Presentations
+*.pptx
+
