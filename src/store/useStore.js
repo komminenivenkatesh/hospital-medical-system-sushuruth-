@@ -22,8 +22,8 @@ const useStore = create((set, get) => ({
   setFontSize: (size) => set({ fontSize: size }),
 
   // ---- Patient / plan ----
-  patient: seedPatient,
-  isPro: seedPatient.plan === 'pro',
+  patient: { ...seedPatient, plan: 'pro' },
+  isPro: true,
   upgradeToPro: () => set((s) => ({ isPro: true, patient: { ...s.patient, plan: 'pro' } })),
   togglePlan: () => set((s) => ({ isPro: !s.isPro, patient: { ...s.patient, plan: s.isPro ? 'free' : 'pro' } })),
 

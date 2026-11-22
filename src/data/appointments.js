@@ -2,7 +2,7 @@ import { doctorPhotos } from './assets';
 
 export const patient = {
   id: 'u001', name: 'Meera Sharma', initials: 'MS', phone: '+91 98765 43210',
-  city: 'Pune', state: 'Maharashtra', dob: '1992-03-15', age: 34, gender: 'Female', plan: 'free',
+  city: 'Pune', state: 'Maharashtra', dob: '1992-03-15', age: 34, gender: 'Female', plan: 'pro',
   appointmentsThisMonth: 2, appointmentLimit: 3, activePrescriptions: 4, mriReports: 0,
   email: 'meera.sharma@gmail.com', bloodGroup: 'B+',
 };

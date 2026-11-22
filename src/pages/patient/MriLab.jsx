@@ -109,7 +109,7 @@ const benefits = [
   { text: 'Encrypted & HIPAA compliant', icon: SecurityOutlinedIcon },
 ];
 
-function LockedView({ onUpgrade }) {
+function LockedView({ onUpgrade, onViewSample }) {
   return (
     <PageTransition>
       <Box sx={{ position: 'relative', borderRadius: 3, overflow: 'hidden', mb: 3, height: { xs: 180, md: 220 } }}>
@@ -175,7 +175,7 @@ function LockedView({ onUpgrade }) {
               <Button variant="contained" size="large" fullWidth sx={{ mb: 1.5, py: 1.25 }} onClick={onUpgrade}>
                 Upgrade to Pro — ₹299/month
               </Button>
-              <Button variant="outlined" fullWidth onClick={onViewSample}>View sample report</Button>
+              <Button variant="outlined" fullWidth onClick={onViewSample || onUpgrade}>View sample report</Button>
             </CardContent>
           </Card>
         </Grid>
@@ -556,7 +556,7 @@ export default function MriLab() {
     };
   }, []);
 
-  if (!isPro) return <LockedView onUpgrade={upgrade} />;
+  if (!isPro) return <LockedView onUpgrade={upgrade} onViewSample={upgrade} />;
 
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/dicom', 'application/pdf', 'application/dicom'];
   const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf', '.dcm', '.dicom', '.nii', '.gz'];
