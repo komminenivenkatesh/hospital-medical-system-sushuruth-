@@ -112,6 +112,21 @@ app.use('/api/articles', articleRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 
+// Database Seeding Endpoint (Protected by secret key)
+const seedDatabase = require('./seed');
+app.get('/api/seed', async (req, res) => {
+  const secret = req.query.secret;
+  if (secret !== 'neurocare2026') {
+    return res.status(403).json({ error: 'Unauthorized: Invalid secret key' });
+  }
+  try {
+    const result = await seedDatabase();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check endpoint
 app.get('/', (req, res) => {
   res.status(200).json({

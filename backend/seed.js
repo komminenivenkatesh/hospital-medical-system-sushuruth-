@@ -19,13 +19,15 @@ const Transaction = require('./models/Transaction');
 const FamilyMember = require('./models/FamilyMember');
 const Article = require('./models/Article');
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/sushruth')
-.then(() => console.log('MongoDB connected for seeding...'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
+// Connect to MongoDB only when run directly
+if (require.main === module) {
+  mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/sushruth')
+  .then(() => console.log('MongoDB connected for seeding...'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
+}
 
 const seedDatabase = async () => {
   try {
@@ -596,11 +598,30 @@ const seedDatabase = async () => {
     console.log('✅ Health articles seeded.');
 
     console.log('🎉 Database seeded successfully!');
-    process.exit();
+    if (require.main === module) {
+      process.exit(0);
+    }
+    return { success: true, message: 'Database seeded successfully' };
   } catch (error) {
     console.error('❌ Error with database seeding:', error);
-    process.exit(1);
+    if (require.main === module) {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
-seedDatabase();
+if (require.main === module) {
+  // Connect to MongoDB
+  mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/sushruth')
+  .then(() => {
+    console.log('MongoDB connected for seeding...');
+    seedDatabase();
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = seedDatabase;
