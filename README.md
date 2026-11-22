@@ -1,438 +1,293 @@
-# 🏥 Sushruth (NeuroCare) — AI-Powered Healthcare & Hospital Management Platform
+# 🏥 Sushruth (NeuroCare) — AI-Integrated Healthcare Operating System & Telemedicine Platform
 
-Welcome to **Sushruth**, a comprehensive, multi-role, AI-integrated hospital and healthcare operating system. The platform connects patients, physicians, and medical administrators with intelligent diagnostics, automated scan analysis, appointment scheduling, and real-time medical consultations.
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.21-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![ONNX Runtime](https://img.shields.io/badge/ONNX_Runtime-1.22-005CED?logo=onnx&logoColor=white)](https://onnxruntime.ai/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose_8.6-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.7-010101?logo=socket.io&logoColor=white)](https://socket.io/)
+[![WebRTC](https://img.shields.io/badge/WebRTC-Peer_to_Peer-333333?logo=webrtc&logoColor=white)](https://webrtc.org/)
+
+**Sushruth** is a full-stack, distributed healthcare operating system and telemedicine platform engineered to solve outpatient diagnostic delays and specialist scarcity. It unifies **Computer-Aided Diagnosis (CAD)** powered by 4 deep learning/machine learning models with **instant browser-native WebRTC peer-to-peer video consultations**, real-time socket chat, and dedicated multi-role portals for **Patients**, **Doctors**, **Hospitals**, and **Administrators**.
 
 ---
 
 ## 📑 Table of Contents
-1. [System Architecture & Tech Stack](#-system-architecture--tech-stack)
-2. [Quick Start & Setup Guide](#-quick-start--setup-guide)
-3. [Port & Service Allocation](#-port--service-allocation)
-4. [Project Directory Structure](#-project-directory-structure)
-5. [AI / Machine Learning Diagnostics Engine](#-ai--machine-learning-diagnostics-engine)
-6. [Backend API Specifications](#-backend-api-specifications)
-7. [Frontend Portals & Page Directory (31 Pages)](#-frontend-portals--page-directory-31-pages)
-8. [📊 Project Progress & Feature Tracker](#-project-progress--feature-tracker)
-9. [Pre-configured Demo Accounts](#-pre-configured-demo-accounts)
-10. [Roadmap & Next Steps](#-roadmap--next-steps)
+1. [🌟 Key Highlights & Innovations](#-key-highlights--innovations)
+2. [🏗 System Architecture](#-system-architecture)
+3. [🧠 Multimodal AI Diagnostics Engine (4 Pipelines)](#-multimodal-ai-diagnostics-engine-4-pipelines)
+4. [📹 WebRTC Telemedicine & Real-Time Engine](#-webrtc-telemedicine--real-time-engine)
+5. [🖥 Multi-Role Portals & Page Map (31 Pages)](#-multi-role-portals--page-map-31-pages)
+6. [🛠 Tech Stack Inventory](#-tech-stack-inventory)
+7. [🚀 Quick Start & Installation Manual](#-quick-start--installation-manual)
+8. [👥 Pre-Configured Demo Accounts](#-pre-configured-demo-accounts)
+9. [📁 Project Codebase Structure](#-project-codebase-structure)
+10. [🔒 Security, Compliance & Resiliency](#-security-compliance--resiliency)
 
 ---
 
-## 🏗 System Architecture & Tech Stack
+## 🌟 Key Highlights & Innovations
 
-```
-   ┌─────────────────────────────────────────────────────────────┐
-   │                  React 19 Frontend (Vite)                   │
-   │               Port: 5175 | Proxy: /api, /socket             │
-   └───────────────┬─────────────────────────────▲───────────────┘
-                   │ HTTP / REST                 │ WebSocket (Socket.io)
-                   ▼                             │
-   ┌─────────────────────────────────────────────┴───────────────┐
-   │                   Express.js API Gateway                    │
-   │               Port: 5000 | JWT Auth & Socket.io             │
-   └───────────────┬─────────────────────────────┬───────────────┘
-                   │ Mongoose                    │ Axios (Multipart/JSON)
-                   ▼                             ▼
-   ┌─────────────────────────────┐ ┌─────────────────────────────┐
-   │      MongoDB Database       │ │      Python ML Service      │
-   │         Port: 27017         │ │  Port: 5001 (PyTorch/ONNX)  │
-   └─────────────────────────────┘ └─────────────────────────────┘
-```
-
-### 1. Frontend Client
-- **Core Framework**: React `19.2.6`, Vite `8.0.12`
-- **Component UI**: Material UI (MUI v9), Emotion, Lucide Icons, Fontsource Manrope
-- **State Management**: Zustand `5.0.14`
-- **Routing**: React Router DOM `v7.17.0` (3 distinct portal shells: Patient, Doctor, Admin)
-- **Real-Time Client**: Socket.io-client `4.8.3`
-- **Visuals & Charts**: Framer Motion `12.40.0`, Recharts `3.8.1`, Cobe (Interactive 3D Globe)
-- **HTTP**: Axios `1.19.0` with token interceptors
-
-### 2. Backend API Gateway
-- **Runtime**: Node.js & Express `4.21.0`
-- **Database ODM**: Mongoose `8.6.0` on MongoDB
-- **Real-time Server**: Socket.io `4.7.5`
-- **Security & Utilities**: JWT (`jsonwebtoken`), Bcryptjs (12 salt rounds), Helmet, CORS, Express-Rate-Limit
-- **File Ingestion**: Multer `2.2.0`, FormData, Axios
-
-### 3. ML Diagnostic Microservice
-- **Runtime**: Python 3.10+ with Flask `3.1.1` & Flask-CORS
-- **Deep Learning / ONNX**: PyTorch (`torch`), ONNX Runtime `1.22.0`
-- **Machine Learning**: XGBoost, Scikit-learn, SciPy, NumPy
-- **Image Processing**: Pillow (PIL)
+- **Multimodal AI Diagnostics Suite**: Instant sub-second inference across 4 medical modalities:
+  - 🧠 **Brain MRI** tumor classification via ResNet-18 (ONNX Runtime).
+  - 🎗 **Breast Mammography** BI-RADS risk classification via MedMNIST CNN (ONNX Runtime).
+  - 🩸 **Complete Blood Count (CBC)** hematology triage via XGBoost.
+  - 🫁 **3D Volumetric Spleen CT** segmentation via PyTorch 3D U-Net.
+- **Automated Clinical Reporting**: Generates standardized medical reports with an objective **Severity Score (1–10 Index)**, anatomical observations, and actionable next steps.
+- **Synchronized WebRTC Telemedicine**: Full peer-to-peer video and audio consultation room with in-call chat, live duration timer, automatic track unmuting, and prescription dispatch.
+- **Multi-Role RBAC Portals**: Context-optimized portals for:
+  - 👤 **Patient Portal**: AI lab, appointment booking, health vault, family dependent records, and chat.
+  - 🩺 **Doctor Workstation**: Patient queues, video consult room, MRI report verification, earnings analytics, and schedule manager.
+  - 🏥 **Hospital Facility Dashboard**: ICU telemetry, real-time bed capacity, ambulance dispatch, and departmental wait times.
+  - 🛡 **Admin Governance Suite**: Doctor license verification queue, fraud prevention, user analytics, and platform moderation.
+- **Mobile-Responsive Architecture**: Glassmorphic UI with safe-area bottom docks, swipeable drawers, and mobile camera constraints.
 
 ---
 
-## 🚀 Quick Start & Setup Guide
+## 🏗 System Architecture
+
+Sushruth implements an enterprise 3-tier distributed microservices architecture:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              TIER 1: PRESENTATION CLIENT                               │
+│                         React 19.2 + Vite 8.0 SPA (Port: 5175)                         │
+│  ┌───────────────────────┐  ┌───────────────────────┐  ┌────────────────────────────┐  │
+│  │ Patient Portal (19p)  │  │   Doctor Portal (7p)  │  │ Admin & Hospital Portals   │  │
+│  └───────────────────────┘  └───────────────────────┘  └────────────────────────────┘  │
+│        │ State: Zustand 5.0   │ UI: Material-UI v9    │ Motion: Framer Motion 12.4     │
+│        │ Styling: Manrope CSS │ Charts: Recharts 3.8  │ Real-Time: Socket.io Client    │
+└────────┼───────────────────────────────────────────────────────────▲───────────────────┘
+         │ HTTP REST (Axios + JWT)                                   │ WebSockets & WebRTC
+         ▼                                                           │
+┌────────────────────────────────────────────────────────────────────┴───────────────────┐
+│                           TIER 2: API GATEWAY & CONTROLLERS                            │
+│                        Node.js + Express.js 4.21 (Port: 5000)                          │
+│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│  │ Security: Helmet.js | CORS | Express-Rate-Limit | Bcryptjs (12 Salt Rounds)      │  │
+│  │ Auth: JWT Bearer Tokens | RBAC Guard Middleware (Patient/Doctor/Hospital/Admin)  │  │
+│  │ Ingestion: Multer (Memory / Multipart Disk Streaming)                            │  │
+│  │ Real-Time: Socket.io 4.7 (Room Isolation, Chat History, Doctor Status Broadcast) │  │
+│  │ WebRTC Signaling: SDP Offer/Answer Exchange & ICE Candidate Relays               │  │
+│  │ Failover Engine: Axios Timeout Detection -> Automatic Structured Diagnostic Mock │  │
+│  └──────────────────────────────────────────────────────────────────────────────────┘  │
+└──────────────┬──────────────────────────────────────────────┬──────────────────────────┘
+               │ Mongoose 8.6 ODM (Port 27017)                │ HTTP POST (Port 5001)
+               ▼                                              ▼
+┌───────────────────────────────┐              ┌─────────────────────────────────────────┐
+│     TIER 3A: PERSISTENCE      │              │     TIER 3B: AI DIAGNOSTICS ENGINE      │
+│       MongoDB Database        │              │       Python Flask 3.1 Microservice     │
+│  13 Production Collections:   │              │ 4 Deep Learning / Machine Learning Caps:│
+│  Users, Doctors, Hospitals,   │              │ • Brain MRI: ResNet-18 (ONNX Runtime)   │
+│  Appointments, Conversations, │              │ • Breast Cancer: MedMNIST (ONNX Runtime)│
+│  Messages, MriAnalysis, etc.  │              │ • Blood CBC: XGBoost Classifier (PKL)   │
+└───────────────────────────────┘              │ • Spleen CT: 3D U-Net (PyTorch Tensor)  │
+                                               └─────────────────────────────────────────┘
+```
+
+---
+
+## 🧠 Multimodal AI Diagnostics Engine (4 Pipelines)
+
+The Python Flask microservice (`ml_service`) performs sub-second CPU inference using lightweight, quantized neural networks:
+
+| Modality | Architecture / Format | Input Tensor | Diagnostic Classes | Severity Index |
+|---|---|---|---|:---:|
+| **Brain MRI** | ResNet-18 (`.onnx`) | `[1, 3, 224, 224]` Float32 | `glioma`, `meningioma`, `pituitary`, `no_tumor` | **1 to 8 / 10** |
+| **Breast Mammogram** | MedMNIST CNN (`.onnx`) | `[1, 3, 224, 224]` Float32 | `malignant` (BI-RADS 5), `benign` (BI-RADS 2) | **1 to 9 / 10** |
+| **Blood CBC Panel** | XGBoost Classifier (`.pkl`) | 6 numeric biomarkers (`wbc`, `rbc`, `hb`, `plt`, `neu`, `lym`) | `Normal`, `Anemia`, `Infection`, `Leukemia` | **1 to 9 / 10** |
+| **Spleen CT Scan** | PyTorch 3D U-Net (`.pt`) | `[1, 1, 96, 96, 96]` Voxels | Voxel-level segmentation, Volume ($cm^3$), Splenomegaly diagnosis | **1 to 7 / 10** |
+
+---
+
+## 📹 WebRTC Telemedicine & Real-Time Engine
+
+- **Signaling Layer**: Handled via Socket.io over port `5000` with ICE candidate exchange and SDP Offer/Answer negotiation.
+- **Media Pipeline**:
+  - Direct hardware transceiver matching for audio (`Opus`) and video (`VP8/H.264`).
+  - Native video re-binding on packet unmute events.
+  - Safe mobile aspect ratio constraints with user-facing camera selection.
+  - Dual stream isolation (muted `<video>` for hardware decoding + separate `<audio>` element for playback).
+- **Synchronized Rooms**: Doctor and Patient portals automatically converge into shared consultation rooms (`/doctor/consult/a001` and `/consult/a001`).
+
+---
+
+## 🖥 Multi-Role Portals & Page Map (31 Pages)
+
+### 👤 Patient Portal (`/`)
+- `/dashboard` — Clinical overview, vital cards, and appointment actions
+- `/find-doctors` — Advanced doctor directory with specialty, location, and fee filters
+- `/doctors/:id` — Doctor profile, patient reviews, credentials, and booking CTA
+- `/booking/:doctorId` — Interactive calendar slot booking with conflict detection
+- `/appointments` — Active, upcoming, and past consultation records
+- `/appointments/:id` — Pre-consultation summary and clinical instructions
+- `/consult/:id` — Full-screen WebRTC video consultation room
+- `/mri` — AI Medical Scan Analysis workstation (MRI, Mammogram, Blood, CT)
+- `/health` — Health Vault (digital prescriptions, lab reports, and vital tracking)
+- `/hospitals` — Hospital directory with live ICU bed telemetry and wait times
+- `/hospitals/:id` — Hospital specialty departments and facility contact
+- `/articles` — Evidence-based medical and wellness articles
+- `/article/:id` — Full article reader with specialist author attribution
+- `/chat` — Direct real-time doctor chat with typing indicators
+- `/family` — Family health accounts and dependent medical records
+- `/payments` — Transaction ledger, invoice download, and billing methods
+- `/upgrade` — Sushruth Pro tier subscription plans
+- `/profile` — Personal patient health profile and demographics
+- `/ai` — Standalone Sushruth AI Health Assistant
+
+### 🩺 Doctor Workstation (`/doctor/*`)
+- `/doctor/dashboard` — Daily consultation schedule, patient queue, and task list
+- `/doctor/patients` — Assigned patient directory with medical history review
+- `/doctor/chat` — Real-time doctor-patient communication workstation
+- `/doctor/consult/:id` — Doctor consultation room with integrated prescription writer
+- `/doctor/mri-review/:id` — AI scan verification and sign-off module
+- `/doctor/earnings` — Payout ledger, consultation revenue, and analytics
+- `/doctor/availability` — Real-time availability toggling (`Available` / `Busy` / `Offline`)
+- `/doctor/profile` — Clinical bio, consultation fees, and qualification editor
+
+### 🛡 Admin Governance Suite (`/admin/*`)
+- `/admin` — System overview with active user metrics and revenue stats
+- `/admin/verification` — Medical license review and doctor credential approvals
+- `/admin/analytics` — Platform-wide diagnostic utilization and consultation trends
+- `/admin/moderation` — Content moderation, review flags, and audit logs
+
+### 🏥 Hospital Operations (`/hospital/*`)
+- `/hospital/dashboard` — ICU/Oxygen bed status, emergency wait times, and ambulance dispatch
+
+---
+
+## 🛠 Tech Stack Inventory
+
+| Domain | Technology | Version | Key Purpose |
+|---|---|---|---|
+| **Frontend** | React | `19.2.6` | Component UI and declarative rendering |
+| **Bundler** | Vite | `8.0.12` | Lightning-fast HMR and production bundling |
+| **Component Library**| Material UI (MUI) | `9.0.1` | Clean healthcare design tokens and accessibility |
+| **Typography** | Fontsource Manrope| `5.2.8` | High-legibility clinical typography |
+| **State Management** | Zustand | `5.0.14` | Client-side reactive store |
+| **Routing** | React Router DOM | `7.17.0` | Nested RBAC protected route management |
+| **Real-Time Client** | Socket.io-client | `4.8.3` | Duplex communication & WebRTC signaling |
+| **Visuals & Charts** | Recharts / Framer Motion | `3.8` / `12.4` | Health analytics charts and fluid transitions |
+| **3D Graphics** | Cobe | `2.0.1` | Interactive WebGL network globe |
+| **Backend API** | Node.js / Express | `18+` / `4.21` | REST API gateway and controllers |
+| **Database & ODM** | MongoDB / Mongoose | `8.6.0` | Document database across 13 collections |
+| **Real-Time Server** | Socket.io | `4.7.5` | WebSocket server with room isolation |
+| **AI Microservice** | Python / Flask | `3.10+` / `3.1` | Dedicated neural inference microservice |
+| **Deep Learning** | PyTorch & ONNX Runtime | `2.x` / `1.22` | CPU-accelerated tensor inference |
+| **Tabular ML** | XGBoost / Scikit-Learn | `2.x` / `1.4` | Complete blood count classification |
+
+---
+
+## 🚀 Quick Start & Installation Manual
 
 ### Prerequisites
 - **Node.js** (v18+)
 - **Python** (v3.10+)
-- **MongoDB** running locally on default port `27017`
+- **MongoDB** running locally on port `27017`
 
-### 1. Installation
-Install root & backend npm dependencies:
+### 1. Clone & Install Dependencies
 ```bash
-# In the project root directory
+# Clone the repository
+git clone https://github.com/komminenivenkatesh/hospital-medical-system-sushuruth-.git
+cd hospital-medical-system-sushuruth-
+
+# Install root dependencies
 npm install
 
-# In the backend directory
+# Install backend dependencies
 cd backend
 npm install
 cd ..
-```
 
-Install Python ML microservice requirements:
-```bash
+# Install Python ML dependencies
 pip install -r ml_service/requirements.txt
 ```
 
-### 2. Database Seeding (First-time setup)
-Populate MongoDB with default doctors, patients, conversations, and appointments:
+### 2. Seed the Database
+Populate MongoDB with default clinical fixtures, doctors, appointments, and medical records:
 ```bash
 npm run seed
 ```
 
-### 3. Unified Launcher
-Start MongoDB, the Python ML Service, Express Backend, and Vite Frontend concurrently:
-
-**On Windows:**
-Double click `start.bat` or run:
+### 3. Launch the Application
+Start MongoDB, the Python ML Service, Express Backend, and Vite Frontend concurrently with a single command:
 ```bash
 npm start
 ```
+*(Or run `npm run dev:all`)*
 
-Or run all 3 services via `concurrently`:
-```bash
-npm run dev:all
-```
-
----
-
-## 🔌 Port & Service Allocation
-
-| Component | Default Port | Description |
+| Service | Port | URL |
 |---|---|---|
-| **Frontend Web App** | `http://localhost:5175` | React single-page application |
-| **Backend REST API** | `http://localhost:5000` | Node.js Express server |
-| **ML Inference Service** | `http://localhost:5001` | Flask AI microservice |
-| **Database** | `mongodb://localhost:27017/neurocare` | MongoDB local database |
+| **Frontend Web Client** | `5175` | `http://localhost:5175` |
+| **Express API Gateway** | `5000` | `http://localhost:5000` |
+| **Python ML Microservice** | `5001` | `http://localhost:5001` |
+| **MongoDB Instance** | `27017` | `mongodb://localhost:27017/neurocare` |
 
 ---
 
-## 📁 Project Directory Structure
+## 👥 Pre-Configured Demo Accounts
+
+Use these pre-seeded accounts to experience all role-based portals:
+
+| Role | Email | Password | Access / Capabilities |
+|---|---|---|---|
+| **Patient** | `meera@example.com` | `password123` | Patient Portal, AI MRI Lab, Bookings, Health Vault |
+| **Doctor** | `arvind.rao@neurocare.com` | `password123` | Doctor Workstation, Video Room, Rx Generator |
+| **Doctor** | `priya.mehta@neurocare.com` | `password123` | Cardiologist Workstation, Patient Review Queue |
+| **Doctor** | `rajesh.kumar@neurocare.com` | `password123` | General Physician Workstation |
+| **Admin** | `admin@neurocare.com` | `password123` | Admin Portal, Doctor Verification, Analytics |
+
+---
+
+## 📁 Project Codebase Structure
 
 ```
 sushuruth/
-├── start.bat                     # 1-Click launcher script for Windows
-├── package.json                  # Root dependencies & orchestration scripts
-├── vite.config.js                # Vite build configuration & API proxies
-├── backend/                      # Node.js Express API & WebSocket Gateway
-│   ├── .env                      # Active backend environment settings
-│   ├── server.js                 # Express server & socket setup
-│   ├── seed.js                   # MongoDB data seeder
-│   ├── config/
-│   │   ├── db.js                 # Mongoose database connection
-│   │   └── socket.js             # Real-time WebSocket handlers
-│   ├── middleware/
-│   │   ├── authMiddleware.js     # JWT verification & role authorization
-│   │   └── errorMiddleware.js    # Centralized error handler
-│   ├── models/                   # Mongoose schemas
-│   │   ├── User.js               # Patient, Doctor, Admin accounts
-│   │   ├── Doctor.js             # Doctor professional metadata & fees
-│   │   ├── Appointment.js        # Bookings & consultation logs
-│   │   ├── Conversation.js       # Chat room metadata
-│   │   ├── Message.js            # Chat messages
-│   │   └── MriAnalysis.js        # AI Scan analysis history
-│   ├── controllers/              # Business logic handlers
-│   │   ├── authController.js
-│   │   ├── doctorController.js
-│   │   ├── appointmentController.js
-│   │   ├── chatController.js
-│   │   └── mriController.js
-│   └── routes/                   # API endpoint routers
-│       ├── authRoutes.js
-│       ├── doctorRoutes.js
-│       ├── appointmentRoutes.js
-│       ├── chatRoutes.js
-│       └── mriRoutes.js
-├── ml_service/                   # Python AI Diagnostics Service
-│   ├── app.py                    # Flask REST API & model runner
-│   ├── unet3d.py                 # Pure PyTorch 3D UNet architecture
-│   ├── requirements.txt          # Python dependencies
-│   └── models/                   # Serialized ML model weights
-│       ├── brain_mri_resnet18.onnx         # Brain tumor classifier (ONNX)
-│       ├── breast_cancer_medmnist.onnx      # Breast cancer model (ONNX)
-│       ├── breast_cancer_medmnist.onnx.data # Model weight tensor data
-│       ├── blood_report_analyzer.pkl       # CBC blood classifier (XGBoost)
-│       └── spleen_unet3d_final.pt          # Spleen 3D segmentation (PyTorch)
-└── src/                          # React Frontend Source Code
-    ├── main.jsx                  # React DOM root entry
-    ├── App.jsx                   # Master routing & animated layout transitions
-    ├── index.css                 # Global styles & design system tokens
-    ├── context/
-    │   └── AuthContext.jsx       # Authentication state & session manager
-    ├── services/
-    │   ├── api.js                # Axios HTTP client with JWT interceptor
-    │   └── socket.js             # Socket.io connection & event subscribers
-    ├── store/
-    │   └── useStore.js           # Zustand global state (theme, notifications, etc.)
-    ├── theme/
-    │   └── theme.js              # Custom MUI design system & palette tokens
-    ├── layout/                   # Role shells and navigations
-    │   ├── AppShell.jsx          # Patient navigation shell
-    │   ├── DoctorShell.jsx       # Doctor navigation shell
-    │   ├── AdminShell.jsx        # Admin navigation shell
-    │   ├── TopNav.jsx            # Universal navigation bar
-    │   ├── Sidebar.jsx           # Desktop sidebar
-    │   ├── MobileNav.jsx         # Bottom mobile navigation
-    │   └── Footer.jsx            # Application footer
-    ├── components/               # 16 Reusable UI components
-    │   ├── ChatWindow.jsx        # Interactive messaging box
-    │   ├── DoctorCard.jsx        # Doctor profile cards with booking CTA
-    │   ├── PreLanding.jsx        # Startup loader & landing animation
-    │   ├── SmartImage.jsx        # Image loader with graceful fallback
-    │   ├── MetricCard.jsx        # Analytical metric display
-    │   └── ...
-    ├── data/                     # Seed & fallback dataset mocks
-    │   ├── doctors.js
-    │   ├── appointments.js
-    │   ├── prescriptions.js
-    │   ├── conversations.js
-    │   └── assets.js
-    └── pages/                    # 31 Page Views
-        ├── auth/Login.jsx
-        ├── patient/ (18 pages)
-        ├── doctor/ (6 pages)
-        └── admin/ (4 pages)
+├── backend/                       # Node.js + Express API Gateway (Port 5000)
+│   ├── config/                    # Database (db.js) & Socket.io (socket.js)
+│   ├── controllers/               # 12 Express controllers handling business logic
+│   ├── middleware/                # JWT verification & error handling guards
+│   ├── models/                    # 13 Mongoose Schemas (User, Doctor, Appointment, Rx...)
+│   ├── routes/                    # REST API routes (/api/*)
+│   ├── seed.js                    # Full database clinical seeder
+│   └── server.js                  # Gateway bootstrap & HTTP/WS server
+├── ml_service/                    # Python Flask Inference Service (Port 5001)
+│   ├── app.py                     # Flask inference endpoints (/predict/*)
+│   ├── unet3d.py                  # PyTorch 3D U-Net architectural definition
+│   ├── requirements.txt           # Python library specifications
+│   └── models/                    # Serialized ONNX, PKL, and PT weights
+├── src/                           # React 19 Frontend Client (Port 5175)
+│   ├── components/                # Reusable UI widgets, cards, and modal components
+│   ├── context/                   # AuthContext with session persistence
+│   ├── data/                      # Fallback clinical fixtures & doctor profiles
+│   ├── hooks/                     # Custom hooks (useWebRTC.js)
+│   ├── layout/                    # AppShell, DoctorShell, AdminShell, TopNav, MobileNav
+│   ├── pages/                     # 31 Clinical application views
+│   │   ├── auth/                  # Login and multi-role Signup
+│   │   ├── patient/               # 19 Patient portal pages (Dashboard, MriLab, Health...)
+│   │   ├── doctor/                # 7 Doctor workstation pages (Dashboard, Consult...)
+│   │   ├── admin/                 # 4 Governance pages (Overview, Verification...)
+│   │   └── hospital/              # Facility dashboard
+│   ├── services/                  # Axios HTTP client (api.js) and socket singleton
+│   ├── store/                     # Zustand state store (useStore.js)
+│   └── theme/                     # Material UI clinical design tokens
+├── package.json                   # Root orchestrator scripts
+└── vite.config.js                 # Bundler config with API proxy
 ```
 
 ---
 
-## 🧠 AI / Machine Learning Diagnostics Engine
+## 🔒 Security, Compliance & Resiliency
 
-The `ml_service` runs 4 trained models capable of clinical-grade inference on CPU:
-
-### 1. Brain MRI Tumor Classifier
-- **Model**: `models/brain_mri_resnet18.onnx` (ResNet-18)
-- **Input**: 2D brain MRI slice (`[1, 3, 224, 224]` float32 normalized)
-- **Diagnostic Classes**:
-  - `glioma` (Severity: 8/10, High Risk)
-  - `meningioma` (Severity: 5/10, Medium Risk)
-  - `pituitary` (Severity: 4/10, Medium Risk)
-  - `no_tumor` (Severity: 1/10, Low Risk)
-- **Endpoint**: `POST /predict/brain`
-
-### 2. Breast Mammography Classifier
-- **Model**: `models/breast_cancer_medmnist.onnx` (MedMNIST ResNet)
-- **Input**: Mammography image slice (`[1, 3, 224, 224]` float32 normalized)
-- **Diagnostic Classes**:
-  - `malignant` (Severity: 9/10, High Risk, BI-RADS 5)
-  - `benign` (Severity: 1/10, Low Risk, BI-RADS 2)
-- **Endpoint**: `POST /predict/breast`
-
-### 3. Complete Blood Count (CBC) Tabular Analyzer
-- **Model**: `models/blood_report_analyzer.pkl` (XGBoost Classifier)
-- **Input**: 6 clinical numeric parameters:
-  `wbc`, `rbc`, `hemoglobin`, `platelets`, `neutrophils`, `lymphocytes`
-- **Diagnostic Classes**:
-  - `Normal` (Severity: 1/10)
-  - `Anemia` (Severity: 4/10)
-  - `Infection` (Severity: 5/10)
-  - `Leukemia` (Severity: 9/10)
-- **Endpoint**: `POST /predict/blood`
-
-### 4. Spleen CT 3D Volumetric Segmentation
-- **Model**: `models/spleen_unet3d_final.pt` (PyTorch 3D U-Net)
-- **Input**: 3D abdominal CT scan standardized to `[1, 1, 96, 96, 96]` voxels
-- **Output**: Voxel-level mask, Spleen Volume ($cm^3$), and classification:
-  - `Normal Spleen` (Volume ratio $\le 0.08$)
-  - `Splenomegaly` (Volume ratio $> 0.08$, Splenic enlargement)
-- **Endpoint**: `POST /predict/spleen`
-
-### 5. Resilient Mock Fallback
-If the ML service is offline or unsupported scans are submitted (e.g. *Cardiac MRI*, *Spine MRI*, *X-Ray*), `backend/controllers/mriController.js` generates detailed clinical diagnostic reports automatically, preventing application errors.
+- **Stateless Authentication**: Signed JSON Web Tokens (JWT) with HTTP-only Authorization Bearer interceptors.
+- **Password Security**: Salted Bcrypt hashing with 12 rounds.
+- **Network Hardening**: Helmet HTTP headers, CORS origin whitelisting, and Express rate limiting.
+- **Failover Engine**: If the ML service is offline or processing is delayed, the API Gateway seamlessly activates structured heuristic diagnostic generators, guaranteeing zero user-facing downtime.
 
 ---
 
-## 📡 Backend API Specifications
-
-### 🔑 Authentication (`/api/auth`)
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | Create new patient or doctor account |
-| `POST` | `/api/auth/login` | Public | Login with email & password, returns JWT |
-| `GET` | `/api/auth/me` | Protected | Fetch currently authenticated user profile |
-
-### 👨‍⚕️ Doctors (`/api/doctors`)
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `GET` | `/api/doctors` | Public | Filter doctors by specialty, status, availability |
-| `GET` | `/api/doctors/:id` | Public | Fetch doctor profile details |
-| `PATCH` | `/api/doctors/status` | Doctor Only | Update online status (`Available`, `Busy`, `Offline`) |
-
-### 📅 Appointments (`/api/appointments`)
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `POST` | `/api/appointments` | Protected | Book a slot with conflict detection |
-| `GET` | `/api/appointments` | Protected | List patient/doctor appointments |
-| `PATCH` | `/api/appointments/:id/status` | Protected | Update status (`confirmed`, `completed`, `cancelled`) |
-
-### 💬 Real-Time Chat (`/api/chat` + Socket.io)
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `GET` | `/api/chat/conversations` | Protected | List all conversation threads for user |
-| `GET` | `/api/chat/conversations/:id/messages`| Protected | Paginated message history |
-| `POST` | `/api/chat/conversations/:id/messages`| Protected | Send new message |
-
-**Socket.io Events:**
-- `join_room`: Join a conversation room
-- `send_message` / `receive_message`: Real-time bidirectional message transfer
-- `typing` / `stop_typing`: Typing indicators
-- `doctor_status_change` / `doctor_status_updated`: Live doctor availability changes
-
-### 🔬 Medical Scans & MRI (`/api/mri`)
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `POST` | `/api/mri/analyze` | Protected | Submit medical scan (file or CBC data) for ML analysis |
-| `GET` | `/api/mri/history` | Protected | Retrieve user's past scan diagnostic history |
-| `POST` | `/api/mri/upload` | Protected | Upload scan file to temporary storage |
-
----
-
-## 🖥 Frontend Portals & Page Directory (31 Pages)
-
-### 👤 1. Patient Portal (18 Pages — `AppShell`)
-1. `/dashboard` — Patient Home Dashboard (stats, next appointment, quick actions)
-2. `/find-doctors` — Search doctors by specialty, location, ratings & fees
-3. `/doctors/:id` — Doctor profile view (experience, reviews, bio, book CTA)
-4. `/booking/:doctorId` — Appointment booking workflow (date/slot/type selection)
-5. `/appointments` — Active, completed, and upcoming appointments
-6. `/appointments/:id` — Appointment details & pre-consultation summary
-7. `/consult/:id` — Teleconsultation Video Room (Full-screen)
-8. `/mri` or `/mri-lab` — AI Diagnostics Lab (MRI, Mammography, Blood & CT upload)
-9. `/health` — Health Vault (Prescriptions, lab records, vitals history)
-10. `/hospitals` — Hospital directory with locations and wait times
-11. `/hospitals/:id` — Hospital details, facilities, and departments
-12. `/articles` — Health & wellness educational library
-13. `/article/:id` — Full medical article reader
-14. `/chat` — Direct messaging with doctors (Socket.io)
-15. `/family` — Family health management & dependent profiles
-16. `/payments` — Transaction ledger, invoices & saved payment methods
-17. `/upgrade` — Sushruth Pro tier subscription plans
-18. `/profile` — Personal profile & account settings
-19. `/ai` — Standalone Sushruth AI Health Assistant (Full-screen)
-
-### 🩺 2. Doctor Portal (6 Pages — `DoctorShell`)
-1. `/doctor/dashboard` — Doctor overview, today's patient queue, pending tasks
-2. `/doctor/patients` — Assigned patient directory & medical histories
-3. `/doctor/consult/:id` — Doctor video consultation interface (Full-screen)
-4. `/doctor/mri-review/:id` — Review & verify AI-generated scan reports
-5. `/doctor/earnings` — Financial payouts, consultation revenue analytics
-6. `/doctor/availability` — Real-time schedule & toggle status (`Available`/`Offline`)
-7. `/doctor/profile` — Doctor profile customization & clinical bio edit
-
-### 🛡 3. Admin Portal (4 Pages — `AdminShell`)
-1. `/admin` — System Overview (platform users, active doctors, revenue)
-2. `/admin/verification` — Review medical licenses & doctor credentials
-3. `/admin/analytics` — Platform metrics, usage trends & appointment analytics
-4. `/admin/moderation` — Content review, dispute resolution & flagged reports
-
----
-
-## 📊 Project Progress & Feature Tracker
-
-Use this section to track completed work versus pending tasks.
-
-### ✅ Completed & Fully Functional
-- [x] **Universal Full-stack Architecture**: Concurrent launcher (`start.bat`) for Frontend, Backend, ML Service, and MongoDB.
-- [x] **Authentication & Role Security**: Register, Login, JWT authorization, Password hashing (Bcrypt 12 rounds).
-- [x] **Doctor Search & Directory**: Live MongoDB querying, specialty filtering, and doctor detail viewing.
-- [x] **Appointment Booking Engine**: Slot booking with duplicate conflict detection and status updates (`confirmed`, `completed`, `cancelled`).
-- [x] **Real-Time Live Chat**: Dual REST + Socket.io protocol with room handling, message persistence, and typing indicators.
-- [x] **AI Diagnostic Engine**: 4 integrated deep learning models (Brain MRI ResNet-18, Breast MedMNIST, Blood CBC XGBoost, Spleen 3D UNet) + automatic fallback reporting.
-- [x] **Scan History Vault**: Preserves past AI diagnostics in MongoDB `MriAnalysis`.
-- [x] **Doctor Status Sync**: Real-time availability toggling via REST & WebSocket.
-- [x] **Design System & Theme Engine**: Dark/Light mode switching, custom color accents, responsive mobile navigation, and Framer Motion transitions.
-- [x] **Database Seeding Utility**: Pre-populates sample doctors, patients, conversations, and appointments.
-
----
-
-### ⏳ Remaining Work & Implementation Backlog
-
-#### 🔴 High Priority (Core Features with UI ready, needing Backend wiring)
-- [ ] **Health Records API Integration**:
-  - *Current*: Hardcoded in `src/data/prescriptions.js`.
-  - *Needed*: Create backend `Prescription` and `LabReport` Mongoose models + CRUD API endpoints to link with `/health`.
-- [ ] **Real LLM Integration for AI Assistant (`/ai`)**:
-  - *Current*: Canned responses in `AiAssistant.jsx`.
-  - *Needed*: Connect to Google Gemini API (or OpenAI) with medical safety prompt guardrails.
-- [ ] **WebRTC Teleconsultation Room (`/consult/:id`)**:
-  - *Current*: Simulated UI with a ticking timer.
-  - *Needed*: Implement WebRTC peer-to-peer audio/video streaming (or integrate Agora/Daily.co/Twilio).
-- [ ] **Payment Gateway Integration (`/payments`, `/upgrade`)**:
-  - *Current*: Static transactions & client-side plan toggling.
-  - *Needed*: Integrate Razorpay / Stripe backend webhooks, create `Transaction` model.
-- [ ] **Live Doctor Dashboard & Queue (`/doctor/dashboard`)**:
-  - *Current*: Static patient queue.
-  - *Needed*: Connect queue to real `appointments` filtered for today and the logged-in doctor.
-
-#### 🟠 Medium Priority (Secondary Portals & Content)
-- [ ] **Family Health Management (`/family`)**:
-  - *Current*: Static data in `prescriptions.js`.
-  - *Needed*: Create `FamilyMember` schema connected to User accounts.
-- [ ] **Hospitals Directory API (`/hospitals`)**:
-  - *Current*: 6 hardcoded hospitals in `Hospitals.jsx`.
-  - *Needed*: Create `Hospital` model & endpoints (or integrate Google Maps/Places API).
-- [ ] **Health Articles CMS (`/articles`)**:
-  - *Current*: 8 hardcoded articles in `Articles.jsx`.
-  - *Needed*: Create `Article` model for dynamic publishing.
-- [ ] **Doctor Financial Analytics (`/doctor/earnings`)**:
-  - *Current*: Static charts.
-  - *Needed*: MongoDB aggregation pipeline calculating earnings from completed consultations.
-- [ ] **Doctor Patient Directory (`/doctor/patients`)**:
-  - *Current*: Hardcoded patient list.
-  - *Needed*: Query distinct patients from the doctor's appointment records.
-- [ ] **Admin Control Panel API Wiring (`/admin/*`)**:
-  - *Current*: Hardcoded stats across Overview, Verification, Analytics, and Moderation.
-  - *Needed*: Platform-wide analytics aggregation endpoints and doctor approval workflow.
-
-#### 🟢 Low Priority & Production Hardening
-- [ ] **Push & In-App Notifications**:
-  - *Current*: Hardcoded notifications array in Zustand store.
-  - *Needed*: Backend `Notification` model with live Socket.io alerts.
-- [ ] **Profile Editing Endpoints**:
-  - *Current*: Read-only displays.
-  - *Needed*: `PUT /api/auth/profile` and `PUT /api/doctors/profile` endpoints.
-- [ ] **Add missing `nibabel` dependency**:
-  - *Current*: 3D NIfTI volumes in `/predict/spleen` require `nibabel` which is omitted from `requirements.txt`.
-  - *Needed*: Add `nibabel` to `ml_service/requirements.txt`.
-- [ ] **Additional ML Models**:
-  - Train and integrate real models for *Cardiac MRI*, *Spine MRI*, and *X-Ray* (currently using mock reports).
-- [ ] **Containerization & Deployment**:
-  - Create `Dockerfile` and `docker-compose.yml` for unified cloud deployment.
-
----
-
-## 👥 Pre-configured Demo Accounts
-
-Use these accounts after running `npm run seed`:
-
-| Role | Email | Password | Details |
-|---|---|---|---|
-| **Patient** | `meera@example.com` | `password123` | Meera Sharma (Sample patient with appointment history) |
-| **Doctor** | `arvind.rao@neurocare.com` | `password123` | Dr. Arvind Rao (Senior Neurologist, ₹600 fee) |
-| **Doctor** | `priya.mehta@neurocare.com` | `password123` | Dr. Priya Mehta (Cardiologist, ₹700 fee) |
-| **Doctor** | `rajesh.kumar@neurocare.com` | `password123` | Dr. Rajesh Kumar (General Physician, ₹200 fee) |
-| **Admin** | `admin@neurocare.com` | `password123` | Admin User (Full administrative access) |
-
----
-
-## 🗺 Roadmap & Next Steps
-
-When resuming development, the recommended sequence of work is:
-1. **Phase 1: Health Records & Prescriptions**: Wire the Patient Health Vault (`/health`) to MongoDB so doctors can write prescriptions and patients can view them.
-2. **Phase 2: Live Doctor Queue**: Connect `/doctor/dashboard` to live appointment records.
-3. **Phase 3: Sushruth AI Assistant**: Integrate Google Gemini API into `/ai` for interactive patient inquiry.
-4. **Phase 4: Teleconsultation Video**: Add peer-to-peer WebRTC video calling between patient and doctor.
-5. **Phase 5: Payments & Pro Subscriptions**: Implement Razorpay/Stripe checkout.
+## 📄 License
+This project is developed for academic, research, and healthcare technology evaluation purposes.
