@@ -92,8 +92,8 @@ export default function FindDoctors() {
             />
 
           {/* Filter row */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <FormControl sx={{ minWidth: 160, flex: 1 }}>
+          <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 2 }, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <FormControl sx={{ minWidth: { xs: 'calc(50% - 8px)', sm: 160 }, flex: 1 }}>
               <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, mb: 0.75 }}>
                 Specialty
               </Typography>
@@ -102,7 +102,7 @@ export default function FindDoctors() {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 140, flex: 1 }}>
+            <FormControl sx={{ minWidth: { xs: 'calc(50% - 8px)', sm: 140 }, flex: 1 }}>
               <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, mb: 0.75 }}>
                 City
               </Typography>
@@ -111,7 +111,7 @@ export default function FindDoctors() {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 120, flex: 1 }}>
+            <FormControl sx={{ minWidth: { xs: 'calc(50% - 8px)', sm: 120 }, flex: 1 }}>
               <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, mb: 0.75 }}>
                 Gender
               </Typography>
@@ -120,7 +120,7 @@ export default function FindDoctors() {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 120, flex: 1 }}>
+            <FormControl sx={{ minWidth: { xs: 'calc(50% - 8px)', sm: 120 }, flex: 1 }}>
               <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, mb: 0.75 }}>
                 Fee Range
               </Typography>

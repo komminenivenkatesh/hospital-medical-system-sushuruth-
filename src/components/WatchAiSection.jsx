@@ -1,8 +1,10 @@
 import { Box, Typography, Button } from '@mui/material';
 import ArrowRightAltRoundedIcon from '@mui/icons-material/ArrowRightAltRounded';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function WatchAiSection() {
+  const navigate = useNavigate();
   return (
     <Box 
       sx={{ 
@@ -56,6 +58,7 @@ export default function WatchAiSection() {
           <Button 
             variant="contained" 
             endIcon={<ArrowRightAltRoundedIcon sx={{ ml: 1, fontSize: 24 }} />}
+            onClick={() => navigate('/mri-lab')}
             sx={{
               bgcolor: '#0F52BA',
               color: '#fff',

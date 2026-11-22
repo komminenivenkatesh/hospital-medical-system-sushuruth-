@@ -6,7 +6,7 @@ import useCounter from '../hooks/useCounter';
 // muted label, optional status text, large Manrope-800 value.
 export default function MetricCard({
   icon: Icon, label, value, suffix, statusText, statusColor = '#10B981',
-  chip, animate = false, footer, compact = false,
+  chip, animate = false, footer, compact = false, onMore,
 }) {
   const numeric = typeof value === 'number';
   const counted = useCounter(numeric ? value : 0);
@@ -17,7 +17,7 @@ export default function MetricCard({
       <CardContent sx={{ p: compact ? 2 : 2.5, '&:last-child': { pb: compact ? 2 : 2.5 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
           {Icon ? <Icon sx={{ fontSize: 16, color: '#9CA3AF' }} /> : <span />}
-          <IconButton size="small" sx={{ color: '#D1D5DB', p: 0.25 }}>
+          <IconButton size="small" onClick={onMore || (() => {})} sx={{ color: '#D1D5DB', p: 0.25 }}>
             <MoreHorizIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Box>

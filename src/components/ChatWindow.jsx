@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Box, Typography, Avatar, IconButton, OutlinedInput, InputAdornment, Alert, Chip } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, OutlinedInput, InputAdornment, Alert, Chip, Tooltip } from '@mui/material';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -8,7 +8,9 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { tokens } from '../theme/theme';
 
@@ -16,16 +18,35 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export default function ChatWindow({ conversation }) {
+export default function ChatWindow({ conversation, onSendMessage, onBack }) {
+  const navigate = useNavigate();
   const sendMessage = useStore((s) => s.sendMessage);
   const disclaimerDismissed = useStore((s) => s.chatDisclaimerDismissed);
   const dismissDisclaimer = useStore((s) => s.dismissChatDisclaimer);
   const [draft, setDraft] = useState('');
   const endRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const msg = `[Attachment: ${file.name}]`;
+      if (onSendMessage) {
+        onSendMessage(conversation.id, msg);
+      } else {
+        sendMessage(conversation.id, msg);
+      }
+      e.target.value = '';
+    }
+  };
+
+  const handleMic = () => {
+    setDraft((prev) => (prev ? prev + ' ' : '') + 'Audio memo: Following up on recent consultation.');
+  };
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversation?.messages.length, conversation?.id]);
+  }, [conversation?.messages?.length, conversation?.id]);
 
   if (!conversation) {
     return (
@@ -44,7 +65,11 @@ export default function ChatWindow({ conversation }) {
   const handleSend = () => {
     const text = draft.trim();
     if (!text) return;
-    sendMessage(conversation.id, text);
+    if (onSendMessage) {
+      onSendMessage(conversation.id, text);
+    } else {
+      sendMessage(conversation.id, text);
+    }
     setDraft('');
   };
 
@@ -52,9 +77,19 @@ export default function ChatWindow({ conversation }) {
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, bgcolor: '#fff' }}>
       {/* Header — iOS style */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        px: 2.5, py: 1.25, borderBottom: `1px solid ${tokens.border}`, bgcolor: 'rgba(255,255,255,0.95)',
+        px: { xs: 1.5, sm: 2.5 }, py: 1.25, borderBottom: `1px solid ${tokens.border}`, bgcolor: 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(12px)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+          {onBack && (
+            <IconButton
+              size="small"
+              onClick={onBack}
+              sx={{ display: { xs: 'inline-flex', sm: 'none' }, mr: -0.5, color: tokens.textPrimary }}
+              aria-label="Back to conversations list"
+            >
+              <ArrowBackRoundedIcon sx={{ fontSize: 22 }} />
+            </IconButton>
+          )}
           <Box sx={{ position: 'relative' }}>
             <Avatar sx={{ width: 42, height: 42, bgcolor: tokens.primary, fontWeight: 800, fontSize: 15 }}>
               {conversation.initials}
@@ -74,11 +109,57 @@ export default function ChatWindow({ conversation }) {
           </Box>
         </Box>
         <Box sx={{ display: 'flex', gap: 0.5 }}>
-          {[PhoneOutlinedIcon, VideocamOutlinedIcon, InfoOutlinedIcon].map((Icon, i) => (
-            <IconButton key={i} size="small" sx={{ width: 36, height: 36, color: tokens.primary }}>
-              <Icon sx={{ fontSize: 20 }} />
+          <Tooltip title="Start Voice Call">
+            <IconButton
+              size="small"
+              sx={{ width: 36, height: 36, color: tokens.primary }}
+              onClick={() => {
+                const isArvind = conversation.doctorName?.toLowerCase().includes('arvind') || conversation.doctorId === 'd001';
+                const isPriya = conversation.doctorName?.toLowerCase().includes('priya') || conversation.doctorId === 'd002';
+                const targetRoom = isArvind ? 'a001' : isPriya ? 'a002' : (conversation.appointmentId || 'a001');
+                navigate(`/consult/${targetRoom}`, {
+                  state: {
+                    doctorName: conversation.doctorName || 'Dr. Arvind Rao',
+                    specialty: `${conversation.specialty || 'Specialist'} · ${conversation.hospital || 'Hospital Consultation'}`,
+                    doctorId: conversation.doctorId,
+                    initials: conversation.initials,
+                  },
+                });
+              }}
+            >
+              <PhoneOutlinedIcon sx={{ fontSize: 20 }} />
             </IconButton>
-          ))}
+          </Tooltip>
+          <Tooltip title="Start Video Consultation">
+            <IconButton
+              size="small"
+              sx={{ width: 36, height: 36, color: tokens.primary }}
+              onClick={() => {
+                const isArvind = conversation.doctorName?.toLowerCase().includes('arvind') || conversation.doctorId === 'd001';
+                const isPriya = conversation.doctorName?.toLowerCase().includes('priya') || conversation.doctorId === 'd002';
+                const targetRoom = isArvind ? 'a001' : isPriya ? 'a002' : (conversation.appointmentId || 'a001');
+                navigate(`/consult/${targetRoom}`, {
+                  state: {
+                    doctorName: conversation.doctorName || 'Dr. Arvind Rao',
+                    specialty: `${conversation.specialty || 'Specialist'} · ${conversation.hospital || 'Hospital Consultation'}`,
+                    doctorId: conversation.doctorId,
+                    initials: conversation.initials,
+                  },
+                });
+              }}
+            >
+              <VideocamOutlinedIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Doctor Profile">
+            <IconButton
+              size="small"
+              sx={{ width: 36, height: 36, color: tokens.primary }}
+              onClick={() => navigate(`/doctors/${conversation.doctorId || 'd001'}`)}
+            >
+              <InfoOutlinedIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
 
@@ -134,10 +215,30 @@ export default function ChatWindow({ conversation }) {
       {/* Input — iOS style */}
       <Box sx={{ px: 2, py: 1.5, borderTop: `1px solid ${tokens.border}`, bgcolor: 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(12px)' }}>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileUpload}
+        />
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}>
           <Box sx={{ display: 'flex', gap: 0.25 }}>
-            <IconButton size="small" sx={{ color: tokens.primary }}><CameraAltOutlinedIcon sx={{ fontSize: 22 }} /></IconButton>
-            <IconButton size="small" sx={{ color: tokens.primary }}><AttachFileOutlinedIcon sx={{ fontSize: 20 }} /></IconButton>
+            <IconButton
+              size="small"
+              onClick={() => fileInputRef.current?.click()}
+              sx={{ color: tokens.primary }}
+              title="Upload photo / scan"
+            >
+              <CameraAltOutlinedIcon sx={{ fontSize: 22 }} />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => fileInputRef.current?.click()}
+              sx={{ color: tokens.primary }}
+              title="Attach document / report"
+            >
+              <AttachFileOutlinedIcon sx={{ fontSize: 20 }} />
+            </IconButton>
           </Box>
           <OutlinedInput
             fullWidth multiline maxRows={4} value={draft}
@@ -154,7 +255,11 @@ export default function ChatWindow({ conversation }) {
               <SendRoundedIcon sx={{ fontSize: 18 }} />
             </IconButton>
           ) : (
-            <IconButton sx={{ color: tokens.primary, width: 38, height: 38 }}>
+            <IconButton
+              onClick={handleMic}
+              title="Voice memo"
+              sx={{ color: tokens.primary, width: 38, height: 38 }}
+            >
               <MicNoneOutlinedIcon sx={{ fontSize: 22 }} />
             </IconButton>
           )}

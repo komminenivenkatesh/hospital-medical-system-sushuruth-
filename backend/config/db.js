@@ -6,22 +6,34 @@
 const mongoose = require('mongoose');
 
 /**
- * Connect to MongoDB database instance.
- * Uses process.env.MONGO_URI for connection string.
- * Logs connection details on success or exits process on failure.
+ * Connect to MongoDB database instance with automatic retry.
+ * Handles slow service starts on Windows and IPv4 loopback binding.
  *
+ * @param {number} retries - Number of connection attempts before failing
+ * @param {number} delayMs - Delay in ms between retries
  * @returns {Promise<typeof mongoose>} Mongoose connection object
  */
-const connectDB = async () => {
-  try {
-    const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/neurocare';
-    const conn = await mongoose.connect(mongoURI);
+const connectDB = async (retries = 5, delayMs = 1500) => {
+  const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/neurocare';
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    return conn;
-  } catch (error) {
-    console.error(`MongoDB Connection Error: ${error.message}`);
-    process.exit(1);
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const conn = await mongoose.connect(mongoURI, {
+        serverSelectionTimeoutMS: 3000,
+      });
+
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+      return conn;
+    } catch (error) {
+      console.warn(`[MongoDB] Connection attempt ${attempt}/${retries} failed: ${error.message}`);
+      if (attempt < retries) {
+        console.log(`[MongoDB] Waiting ${delayMs / 1000}s for MongoDB service to be ready...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      } else {
+        console.error(`MongoDB Connection Fatal: Unable to connect to MongoDB at ${mongoURI} after ${retries} attempts.`);
+        process.exit(1);
+      }
+    }
   }
 };
 

@@ -1,17 +1,26 @@
 import { Box, Card, CardContent, Typography, Chip, Button } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from 'react-router-dom';
 import { schedule } from '../data/appointments';
 
 // Image-2 style "My schedule" panel.
 export default function SchedulePanel() {
+  const navigate = useNavigate();
   return (
     <Card>
       <CardContent sx={{ p: 2.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography sx={{ fontSize: 13, color: '#6B7280', fontWeight: 500 }}>My schedule</Typography>
-          <Button size="small" variant="outlined" endIcon={<KeyboardArrowDownIcon />}
-            sx={{ py: 0.25, px: 1.25, fontSize: 12, color: '#6B7280' }}>Filter</Button>
+          <Button
+            size="small"
+            variant="outlined"
+            endIcon={<KeyboardArrowDownIcon />}
+            onClick={() => navigate('/doctor/availability')}
+            sx={{ py: 0.25, px: 1.25, fontSize: 12, color: '#6B7280' }}
+          >
+            Manage
+          </Button>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, mb: 2 }}>
@@ -46,8 +55,14 @@ export default function SchedulePanel() {
         </Box>
 
         {/* Solid blue "Your Exercise" CTA */}
-        <Box sx={{ mt: 2, bgcolor: 'primary.main', borderRadius: '12px', p: 2,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box
+          onClick={() => navigate('/articles')}
+          sx={{
+            mt: 2, bgcolor: 'primary.main', borderRadius: '12px', p: 2, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            '&:hover': { bgcolor: 'primary.dark' }, transition: 'all 0.2s',
+          }}
+        >
           <Box>
             <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>Your Exercise</Typography>
             <Typography sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Brain activity · 20 min</Typography>

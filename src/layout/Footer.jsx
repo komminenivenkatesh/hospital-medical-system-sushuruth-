@@ -141,6 +141,7 @@ export default function Footer() {
                   key={label}
                   size="small"
                   aria-label={label}
+                  onClick={() => window.open(`https://${label.toLowerCase()}.com`, '_blank')}
                   sx={{
                     width: 34, height: 34,
                     bgcolor: tokens.surfaceMuted,
@@ -273,7 +274,7 @@ export default function Footer() {
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 2,
-          pb: 3,
+          pb: { xs: 12, md: 3 },
         }}>
           <Typography sx={{ fontSize: 12.5, color: tokens.textTertiary }}>
             © 2025 Sushruth Healthcare Pvt. Ltd. · All rights reserved. · Bengaluru, India

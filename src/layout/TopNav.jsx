@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Box, Typography, IconButton, Badge, Avatar, Menu, MenuItem, ListItemIcon,
   Divider, Popover, List, ListItemButton, ListItemText, ListItemAvatar,
-  Button, Chip, InputBase, Paper, Collapse,
+  Button, Chip, InputBase, Paper, Collapse, Drawer, Switch,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +29,11 @@ import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
+import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
+import FamilyRestroomRoundedIcon from '@mui/icons-material/FamilyRestroomRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import { makeTokens } from '../theme/theme';
 import { patientPhotos } from '../data/assets';
 import Logo from '../components/Logo';
@@ -69,6 +74,7 @@ export default function TopNav() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQ, setSearchQ] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const searchRef = useRef(null);
 
   const { user: authUser, logout, isAuthenticated } = useAuth();
@@ -80,6 +86,7 @@ export default function TopNav() {
   const isPro           = useStore((s) => s.isPro);
   const themeMode       = useStore((s) => s.themeMode);
   const accentColor     = useStore((s) => s.accentColor);
+  const setThemeMode    = useStore((s) => s.setThemeMode);
 
   const t = makeTokens(themeMode, accentColor);
   const dark = themeMode === 'dark';
@@ -147,17 +154,17 @@ export default function TopNav() {
         component="header"
         sx={{
           position: 'sticky',
-          top: 12,
+          top: { xs: 8, md: 12 },
           zIndex: 1200,
-          mx: { xs: 1.5, md: 3 },
-          mb: 3,
+          mx: { xs: 1, sm: 2, md: 3 },
+          mb: { xs: 2, md: 3 },
           background: navBg,
           backdropFilter: 'blur(24px) saturate(180%)',
           WebkitBackdropFilter: 'blur(24px) saturate(180%)',
           border: `1px solid ${navBorder}`,
-          borderRadius: '18px',
-          px: { xs: 2, md: 3 },
-          height: 62,
+          borderRadius: { xs: '14px', md: '18px' },
+          px: { xs: 1.5, md: 3 },
+          height: { xs: 54, md: 62 },
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -360,7 +367,10 @@ export default function TopNav() {
             slotProps={{
               paper: {
                 sx: {
-                  mt: 1.5, width: 380, maxHeight: 480,
+                  mt: 1.5,
+                  width: { xs: 'calc(100vw - 28px)', sm: 380 },
+                  maxWidth: 380,
+                  maxHeight: 480,
                   borderRadius: '16px',
                   border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : '#E5E7EB'}`,
                   boxShadow: '0 16px 40px rgba(0,0,0,0.12)',
@@ -518,8 +528,298 @@ export default function TopNav() {
               Sign out
             </MenuItem>
           </Menu>
+
+          {/* Mobile Drawer Hamburger Button */}
+          <IconButton
+            size="small"
+            onClick={() => setDrawerOpen(true)}
+            sx={{
+              display: { xs: 'flex', lg: 'none' },
+              color: mutedColor,
+              bgcolor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,82,186,0.06)',
+              borderRadius: '10px',
+              width: 36, height: 36,
+              '&:hover': { bgcolor: dark ? 'rgba(255,255,255,0.12)' : 'rgba(15,82,186,0.10)', color: activeColor },
+              transition: 'all 200ms ease',
+            }}
+            aria-label="Open mobile navigation menu"
+          >
+            <MenuRoundedIcon sx={{ fontSize: 20 }} />
+          </IconButton>
         </Box>
       </Box>
+
+      {/* Mobile Drawer (Slide-out navigation menu for mobile) */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              width: '85vw',
+              maxWidth: 340,
+              bgcolor: dark ? '#0F172A' : '#FFFFFF',
+              color: textColor,
+              p: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: dark ? '-8px 0 32px rgba(0,0,0,0.6)' : '-8px 0 32px rgba(0,0,0,0.12)',
+            },
+          },
+        }}
+      >
+        {/* Drawer Header */}
+        <Box sx={{
+          p: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : '#E5E7EB'}`,
+          bgcolor: dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,82,186,0.03)',
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Avatar sx={{ width: 38, height: 38, border: `2px solid ${t.primary}40`, bgcolor: t.primary, fontWeight: 700, fontSize: 14 }}>
+              {authUser?.name ? authUser.name.split(' ').map(w => w[0]).join('').slice(0, 2) : (patient?.initials || 'U')}
+            </Avatar>
+            <Box>
+              <Typography sx={{ fontWeight: 800, fontSize: 14, color: textColor, lineHeight: 1.2 }}>
+                {authUser?.name || patient?.name || 'User'}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
+                <Chip
+                  label={isPro ? '✦ Pro' : 'Free'}
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: 9.5,
+                    fontWeight: 700,
+                    bgcolor: isPro ? 'rgba(245,158,11,0.15)' : (dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'),
+                    color: isPro ? '#F59E0B' : mutedColor,
+                  }}
+                />
+                <Typography sx={{ fontSize: 11, color: mutedColor }}>Pune</Typography>
+              </Box>
+            </Box>
+          </Box>
+          <IconButton size="small" onClick={() => setDrawerOpen(false)} sx={{ color: mutedColor }}>
+            <CloseRoundedIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Box>
+
+        {/* Featured: Ask AI Assistant Button */}
+        <Box sx={{ p: 2, pb: 1 }}>
+          <Box
+            onClick={() => { setDrawerOpen(false); navigate('/ai'); }}
+            sx={{
+              p: 1.5,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)',
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(124,58,237,0.3)',
+              transition: 'transform 150ms ease',
+              '&:active': { transform: 'scale(0.98)' },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AutoAwesomeRoundedIcon sx={{ fontSize: 18, color: '#fff' }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 800, fontSize: 13.5, lineHeight: 1.2 }}>Ask Sushruth AI</Typography>
+                <Typography sx={{ fontSize: 11, opacity: 0.85 }}>Symptom & Report Assistant</Typography>
+              </Box>
+            </Box>
+            <ChevronRightRoundedIcon sx={{ fontSize: 18, opacity: 0.8 }} />
+          </Box>
+        </Box>
+
+        {/* Drawer Scrollable Links */}
+        <Box sx={{ flex: 1, overflowY: 'auto', px: 1.5, py: 1 }}>
+          <Typography sx={{ px: 1.5, pt: 1, pb: 0.5, fontSize: 11, fontWeight: 700, color: mutedColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Main Menu
+          </Typography>
+
+          <List disablePadding>
+            {[
+              { label: 'Home Dashboard', path: '/dashboard', icon: HomeRoundedIcon },
+              { label: 'Find Doctors', path: '/find-doctors', icon: PersonSearchRoundedIcon },
+              { label: 'Appointments', path: '/appointments', icon: EventNoteRoundedIcon },
+              { label: 'Health Vault', path: '/health', icon: FolderRoundedIcon },
+              { label: 'AI MRI Analysis', path: '/mri', icon: BiotechRoundedIcon },
+              { label: 'Direct Messages', path: '/chat', icon: ChatBubbleOutlineRoundedIcon },
+              { label: 'Network Hospitals', path: '/hospitals', icon: LocalHospitalOutlinedIcon },
+              { label: 'Health Articles', path: '/articles', icon: ArticleOutlinedIcon },
+              { label: 'Family Vault', path: '/family', icon: FamilyRestroomRoundedIcon },
+            ].map((it) => {
+              const active = pathname === it.path || (it.path !== '/dashboard' && pathname.startsWith(it.path + '/'));
+              const Icon = it.icon;
+              return (
+                <ListItemButton
+                  key={it.path}
+                  onClick={() => { setDrawerOpen(false); navigate(it.path); }}
+                  sx={{
+                    borderRadius: '10px',
+                    mb: 0.5,
+                    px: 1.5,
+                    py: 1,
+                    bgcolor: active ? (dark ? `${t.primary}20` : t.primarySoft) : 'transparent',
+                    color: active ? activeColor : textColor,
+                    fontWeight: active ? 700 : 500,
+                    '&:hover': { bgcolor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(15,82,186,0.05)' },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 36, color: active ? activeColor : mutedColor }}>
+                    <Icon sx={{ fontSize: 19 }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={it.label}
+                    primaryTypographyProps={{ fontSize: 13.5, fontWeight: active ? 700 : 500 }}
+                  />
+                  {active && (
+                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: activeColor }} />
+                  )}
+                </ListItemButton>
+              );
+            })}
+          </List>
+
+          <Divider sx={{ my: 1.5, borderColor: dark ? 'rgba(255,255,255,0.06)' : '#E5E7EB' }} />
+
+          <Typography sx={{ px: 1.5, pt: 0.5, pb: 0.5, fontSize: 11, fontWeight: 700, color: mutedColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Account & Settings
+          </Typography>
+
+          <List disablePadding>
+            <ListItemButton
+              onClick={() => { setDrawerOpen(false); navigate('/profile'); }}
+              sx={{ borderRadius: '10px', px: 1.5, py: 1 }}
+            >
+              <ListItemIcon sx={{ minWidth: 36, color: mutedColor }}>
+                <PersonOutlineRoundedIcon sx={{ fontSize: 19 }} />
+              </ListItemIcon>
+              <ListItemText primary="My Profile & Settings" primaryTypographyProps={{ fontSize: 13.5 }} />
+            </ListItemButton>
+
+            <ListItemButton
+              onClick={() => { setDrawerOpen(false); navigate('/payments'); }}
+              sx={{ borderRadius: '10px', px: 1.5, py: 1 }}
+            >
+              <ListItemIcon sx={{ minWidth: 36, color: mutedColor }}>
+                <PaymentOutlinedIcon sx={{ fontSize: 19 }} />
+              </ListItemIcon>
+              <ListItemText primary="Payments & Plans" primaryTypographyProps={{ fontSize: 13.5 }} />
+            </ListItemButton>
+          </List>
+
+          <Divider sx={{ my: 1.5, borderColor: dark ? 'rgba(255,255,255,0.06)' : '#E5E7EB' }} />
+
+          <Typography sx={{ px: 1.5, pt: 0.5, pb: 0.5, fontSize: 11, fontWeight: 700, color: mutedColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Portals
+          </Typography>
+
+          <Box sx={{ px: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<MedicalServicesOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={() => { setDrawerOpen(false); navigate('/doctor/dashboard'); }}
+              sx={{
+                justifyContent: 'flex-start',
+                borderRadius: '10px',
+                py: 0.8,
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: t.teal,
+                borderColor: `${t.teal}40`,
+                '&:hover': { bgcolor: `${t.teal}10`, borderColor: t.teal },
+              }}
+            >
+              Doctor Portal
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ShieldOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={() => { setDrawerOpen(false); navigate('/admin'); }}
+              sx={{
+                justifyContent: 'flex-start',
+                borderRadius: '10px',
+                py: 0.8,
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: '#7C3AED',
+                borderColor: '#7C3AED40',
+                '&:hover': { bgcolor: '#7C3AED10', borderColor: '#7C3AED' },
+              }}
+            >
+              Admin Console
+            </Button>
+          </Box>
+        </Box>
+
+        {/* Drawer Bottom Bar: Dark Mode Switch & Sign Out */}
+        <Box sx={{
+          p: 2,
+          borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : '#E5E7EB'}`,
+          bgcolor: dark ? 'rgba(0,0,0,0.2)' : '#F8FAFC',
+        }}>
+          {/* Dark mode switch */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 1.5,
+            px: 0.5,
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {dark ? (
+                <DarkModeRoundedIcon sx={{ fontSize: 18, color: '#F59E0B' }} />
+              ) : (
+                <LightModeRoundedIcon sx={{ fontSize: 18, color: '#F59E0B' }} />
+              )}
+              <Typography sx={{ fontSize: 13, fontWeight: 600, color: textColor }}>
+                {dark ? 'Dark Mode' : 'Light Mode'}
+              </Typography>
+            </Box>
+            <Switch
+              size="small"
+              checked={dark}
+              onChange={(e) => setThemeMode(e.target.checked ? 'dark' : 'light')}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': { color: t.primary },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: t.primary },
+              }}
+            />
+          </Box>
+
+          <Button
+            fullWidth
+            size="small"
+            startIcon={<LogoutRoundedIcon sx={{ fontSize: 16 }} />}
+            onClick={() => {
+              setDrawerOpen(false);
+              logout();
+              navigate('/login');
+            }}
+            sx={{
+              bgcolor: t.dangerSoft,
+              color: t.danger,
+              borderRadius: '10px',
+              py: 0.9,
+              fontWeight: 700,
+              fontSize: 13,
+              '&:hover': { bgcolor: `${t.danger}22` },
+            }}
+          >
+            Sign Out
+          </Button>
+        </Box>
+      </Drawer>
 
       {/* Search Overlay */}
       <AnimatePresence>

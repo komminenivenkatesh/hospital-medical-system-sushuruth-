@@ -6,6 +6,12 @@ const {
   updateDoctorStatus,
   getVerifications,
   updateVerificationStatus,
+  getDoctorPatients,
+  getDoctorDashboardStats,
+  getMyDoctorProfile,
+  updateMyDoctorProfile,
+  getMyAvailability,
+  updateMyAvailability,
 } = require('../controllers/doctorController');
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
 
@@ -22,6 +28,48 @@ router.get('/', getAllDoctors);
  * @access  Private (Admin / Authenticated)
  */
 router.get('/verifications', protect, getVerifications);
+
+/**
+ * @route   GET /api/doctors/my/profile
+ * @desc    Get profile of the currently logged in doctor
+ * @access  Private (Doctor only)
+ */
+router.get('/my/profile', protect, authorizeRoles('doctor'), getMyDoctorProfile);
+
+/**
+ * @route   PUT /api/doctors/my/profile
+ * @desc    Update profile of the currently logged in doctor
+ * @access  Private (Doctor only)
+ */
+router.put('/my/profile', protect, authorizeRoles('doctor'), updateMyDoctorProfile);
+
+/**
+ * @route   GET /api/doctors/my/availability
+ * @desc    Get availability schedule of the currently logged in doctor
+ * @access  Private (Doctor only)
+ */
+router.get('/my/availability', protect, authorizeRoles('doctor'), getMyAvailability);
+
+/**
+ * @route   PUT /api/doctors/my/availability
+ * @desc    Update availability schedule of the currently logged in doctor
+ * @access  Private (Doctor only)
+ */
+router.put('/my/availability', protect, authorizeRoles('doctor'), updateMyAvailability);
+
+/**
+ * @route   GET /api/doctors/my/patients
+ * @desc    Get all assigned patients for the logged in doctor
+ * @access  Private (Doctor only)
+ */
+router.get('/my/patients', protect, authorizeRoles('doctor'), getDoctorPatients);
+
+/**
+ * @route   GET /api/doctors/my/dashboard-stats
+ * @desc    Get dashboard metrics & queue for the logged in doctor
+ * @access  Private (Doctor only)
+ */
+router.get('/my/dashboard-stats', protect, authorizeRoles('doctor'), getDoctorDashboardStats);
 
 /**
  * @route   PATCH /api/doctors/status

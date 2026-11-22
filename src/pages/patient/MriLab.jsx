@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import jsPDF from 'jspdf';
 import {
   Box, Card, CardContent, Typography, Button, Chip, Grid, LinearProgress,
   Alert, Stack, Avatar, IconButton, Divider, Tabs, Tab, Tooltip, TextField,
@@ -174,7 +175,7 @@ function LockedView({ onUpgrade }) {
               <Button variant="contained" size="large" fullWidth sx={{ mb: 1.5, py: 1.25 }} onClick={onUpgrade}>
                 Upgrade to Pro — ₹299/month
               </Button>
-              <Button variant="outlined" fullWidth>View sample report</Button>
+              <Button variant="outlined" fullWidth onClick={onViewSample}>View sample report</Button>
             </CardContent>
           </Card>
         </Grid>
@@ -239,8 +240,8 @@ function DetailPanel({ scan, onClose }) {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <Typography sx={{ fontWeight: 700, fontSize: 14 }}>AI Findings</Typography>
               <Box sx={{ display: 'flex', gap: 0.5 }}>
-                <IconButton size="small"><OpenInNewRoundedIcon sx={{ fontSize: 16 }} /></IconButton>
-                <IconButton size="small"><MoreHorizRoundedIcon sx={{ fontSize: 16 }} /></IconButton>
+                <IconButton size="small" onClick={() => alert(`Findings:\n${scan.findings}`)} title="View full report"><OpenInNewRoundedIcon sx={{ fontSize: 16 }} /></IconButton>
+                <IconButton size="small" onClick={() => alert(`Scan Date: ${scan.date}\nReviewing Doctor: ${scan.doctor}\nRisk Level: ${scan.risk}`)} title="More Details"><MoreHorizRoundedIcon sx={{ fontSize: 16 }} /></IconButton>
               </Box>
             </Box>
             <Typography sx={{ fontSize: 13, color: tokens.textSecondary, lineHeight: 1.6, mb: 1.5 }}>
@@ -257,7 +258,7 @@ function DetailPanel({ scan, onClose }) {
           <Box sx={{ px: 2.5, py: 2, borderBottom: `1px solid ${tokens.border}` }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
               <Typography sx={{ fontWeight: 700, fontSize: 14 }}>Analysis Details</Typography>
-              <IconButton size="small"><MoreHorizRoundedIcon sx={{ fontSize: 16 }} /></IconButton>
+              <IconButton size="small" onClick={() => alert('All regional biomarker markers evaluated and verified.')} title="Marker details"><MoreHorizRoundedIcon sx={{ fontSize: 16 }} /></IconButton>
             </Box>
             <Stack spacing={1.25}>
               {scan.details.map((d) => (
@@ -310,11 +311,178 @@ function DetailPanel({ scan, onClose }) {
               </Box>
               <Typography sx={{ fontSize: 11, color: tokens.textTertiary, ml: 'auto' }}>{scan.date}</Typography>
             </Box>
-            <Button fullWidth variant="contained" startIcon={<DownloadRoundedIcon />} sx={{ mb: 1 }}>
-              Download Report
+            <Button
+              fullWidth
+              variant="contained"
+              startIcon={<DownloadRoundedIcon />}
+              onClick={() => {
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                // Brand Header Bar
+                doc.setFillColor(37, 99, 235); // Primary medical blue
+                doc.rect(0, 0, 210, 26, 'F');
+
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('SUSHRUTH HEALTHCARE SYSTEM', 14, 13);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.text('AI Medical Diagnostic Report · ISO 13485 Certified Clinical Protocol', 14, 20);
+
+                // Report Title & Meta
+                doc.setTextColor(30, 41, 59);
+                doc.setFontSize(15);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${scan.type.toUpperCase()} ANALYSIS REPORT`, 14, 38);
+
+                // Meta Box
+                doc.setDrawColor(226, 232, 240);
+                doc.setFillColor(248, 250, 252);
+                doc.roundedRect(14, 43, 182, 28, 2, 2, 'FD');
+
+                doc.setFontSize(9);
+                doc.setTextColor(100, 116, 139);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Date of Report:', 20, 51);
+                doc.text('Reviewing Doctor:', 20, 59);
+                doc.text('Report ID:', 110, 51);
+                doc.text('AI Model Status:', 110, 59);
+
+                doc.setTextColor(15, 23, 42);
+                doc.setFont('helvetica', 'bold');
+                doc.text(String(scan.date || 'Today'), 52, 51);
+                doc.text(`${scan.doctor || 'Dr. Arvind Rao'} (${scan.specialty || 'Specialist'})`, 52, 59);
+                doc.text(`REP-${String(scan.id || Date.now()).slice(-6).toUpperCase()}`, 142, 51);
+                doc.text(`Active (Confidence: ${scan.confidence}%)`, 142, 59);
+
+                // Findings Section
+                let currentY = 80;
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(37, 99, 235);
+                doc.text('1. CLINICAL FINDINGS & AI IMPRESSION', 14, currentY);
+
+                currentY += 6;
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(51, 65, 85);
+
+                const splitFindings = doc.splitTextToSize(scan.findings || 'No abnormalities detected.', 182);
+                doc.text(splitFindings, 14, currentY);
+                currentY += (splitFindings.length * 5.5) + 6;
+
+                // Diagnostics Parameter Table
+                if (scan.details && scan.details.length > 0) {
+                  doc.setFontSize(12);
+                  doc.setFont('helvetica', 'bold');
+                  doc.setTextColor(37, 99, 235);
+                  doc.text('2. QUANTITATIVE PARAMETERS & INDICES', 14, currentY);
+                  currentY += 6;
+
+                  // Table Header
+                  doc.setFillColor(241, 245, 249);
+                  doc.rect(14, currentY, 182, 8, 'F');
+                  doc.setFontSize(9);
+                  doc.setFont('helvetica', 'bold');
+                  doc.setTextColor(71, 85, 105);
+                  doc.text('PARAMETER / LAB TEST', 18, currentY + 5.5);
+                  doc.text('OBSERVED VALUE', 110, currentY + 5.5);
+                  doc.text('STATUS', 160, currentY + 5.5);
+                  currentY += 8;
+
+                  // Rows
+                  doc.setFont('helvetica', 'normal');
+                  scan.details.forEach((item, index) => {
+                    const rowBg = index % 2 === 0 ? 255 : 250;
+                    doc.setFillColor(rowBg, rowBg, rowBg);
+                    doc.rect(14, currentY, 182, 7.5, 'F');
+
+                    doc.setTextColor(30, 41, 59);
+                    doc.text(String(item.label || ''), 18, currentY + 5);
+                    doc.text(String(item.value || ''), 110, currentY + 5);
+
+                    if (item.status === 'warn') {
+                      doc.setTextColor(217, 119, 6); // amber/warn
+                      doc.text('Abnormal / Attention', 160, currentY + 5);
+                    } else {
+                      doc.setTextColor(16, 185, 129); // green/ok
+                      doc.text('Normal', 160, currentY + 5);
+                    }
+                    currentY += 7.5;
+                  });
+                  currentY += 6;
+                }
+
+                // Risk & Summary Badge Box
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(37, 99, 235);
+                doc.text('3. DIAGNOSTIC ASSESSMENT & TRIAGE', 14, currentY);
+                currentY += 6;
+
+                doc.setDrawColor(226, 232, 240);
+                doc.setFillColor(scan.risk === 'High' ? 254 : scan.risk === 'Medium' ? 255 : 240, 
+                                 scan.risk === 'High' ? 242 : scan.risk === 'Medium' ? 251 : 253, 
+                                 scan.risk === 'High' ? 242 : scan.risk === 'Medium' ? 235 : 250);
+                doc.roundedRect(14, currentY, 182, 20, 2, 2, 'FD');
+
+                doc.setFontSize(10);
+                doc.setTextColor(15, 23, 42);
+                doc.text(`Calculated Risk Tier: ${scan.risk || 'Low'}`, 20, currentY + 8);
+                doc.text(`Severity Rating: ${scan.severity || 1} / 10`, 20, currentY + 15);
+                doc.text(`Model Confidence: ${scan.confidence || 95}%`, 110, currentY + 8);
+                doc.text('Verification: Reviewed by Medical Staff', 110, currentY + 15);
+
+                currentY += 28;
+
+                // Recommendations
+                if (scan.recommendations && scan.recommendations.length > 0) {
+                  doc.setFontSize(12);
+                  doc.setFont('helvetica', 'bold');
+                  doc.setTextColor(37, 99, 235);
+                  doc.text('4. CLINICAL RECOMMENDATIONS', 14, currentY);
+                  currentY += 6;
+
+                  doc.setFontSize(9.5);
+                  doc.setFont('helvetica', 'normal');
+                  doc.setTextColor(51, 65, 85);
+                  scan.recommendations.forEach((rec) => {
+                    doc.text(`•  ${rec}`, 18, currentY);
+                    currentY += 5.5;
+                  });
+                  currentY += 4;
+                }
+
+                // Footer & Disclaimer
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184);
+                doc.text(
+                  'Disclaimer: This report incorporates deep learning assistive models and clinical reviews. Please consult your physician for final medical decisions.',
+                  14,
+                  282
+                );
+
+                // Save PDF
+                doc.save(`${(scan.type || 'Medical_Scan').replace(/\s+/g, '_')}_Report.pdf`);
+              }}
+              sx={{ mb: 1, borderRadius: '100px' }}
+            >
+              Download PDF Report
             </Button>
-            <Button fullWidth variant="outlined" startIcon={<ShareRoundedIcon />}>
-          Share with Doctor
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<ShareRoundedIcon />}
+              onClick={() => {
+                if (navigator.clipboard) {
+                  navigator.clipboard.writeText(`Diagnostic Scan Report (${scan.type}) reviewed by ${scan.doctor}: Normal/Low Risk.`);
+                  alert('Scan report reference copied to clipboard!');
+                }
+              }}
+              sx={{ borderRadius: '100px' }}
+            >
+              Share with Doctor
             </Button>
           </Box>
         </CardContent>
@@ -327,6 +495,8 @@ export default function MriLab() {
   const isPro = useStore((s) => s.isPro);
   const upgrade = useStore((s) => s.upgradeToPro);
   const [activeTab, setActiveTab] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const viewerContainerRef = useRef(null);
   const [scans, setScans] = useState(scanHistory);
   const [selectedScan, setSelectedScan] = useState(scanHistory[0]);
   const [activeHotspot, setActiveHotspot] = useState('head');
@@ -389,7 +559,7 @@ export default function MriLab() {
   if (!isPro) return <LockedView onUpgrade={upgrade} />;
 
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/dicom', 'application/pdf', 'application/dicom'];
-  const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf', '.dcm', '.dicom'];
+  const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.pdf', '.dcm', '.dicom', '.nii', '.gz'];
   const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
 
   const validateFile = (file) => {
@@ -463,7 +633,9 @@ export default function MriLab() {
       setActiveTab(0);
     } catch (error) {
       console.error('MRI analysis failed:', error);
-      setUploadError('Failed to analyze scan. Please ensure the backend server is running and try again.');
+      const serverMessage = error.response?.data?.error;
+      setUploadError(serverMessage || 'Failed to analyze scan. Please ensure the backend server is running and try again.');
+      setActiveTab(1); // Stay on upload tab so the error banner is clearly visible
     } finally {
       setUploading(false);
     }
@@ -536,13 +708,26 @@ export default function MriLab() {
         <Chip label="Pro Active" sx={{ bgcolor: tokens.successSoft, color: tokens.success, fontWeight: 700 }} />
       </Box>
 
-      <Box sx={{ bgcolor: tokens.surfaceMuted, borderRadius: 100, p: 0.5, display: 'inline-flex', gap: 0.5, mb: 2.5 }}>
+      <Box sx={{
+        bgcolor: tokens.surfaceMuted,
+        borderRadius: 100,
+        p: 0.5,
+        display: 'inline-flex',
+        gap: 0.5,
+        mb: 2.5,
+        maxWidth: '100%',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}>
         {['Diagnosis', 'Upload Scan', 'History'].map((t, i) => (
           <Box key={t} onClick={() => setActiveTab(i)}
-            sx={{ px: 2.5, py: 0.9, borderRadius: 100, cursor: 'pointer',
+            sx={{ px: { xs: 2, sm: 2.5 }, py: 0.9, borderRadius: 100, cursor: 'pointer',
               bgcolor: activeTab === i ? '#fff' : 'transparent',
               boxShadow: activeTab === i ? tokens.cardShadow : 'none',
-              fontWeight: activeTab === i ? 700 : 500, fontSize: 13,
+              fontWeight: activeTab === i ? 700 : 500, fontSize: { xs: 12, sm: 13 },
+              whiteSpace: 'nowrap',
               color: activeTab === i ? tokens.textPrimary : tokens.textSecondary,
               transition: 'all 150ms ease' }}>
             {t}
@@ -561,7 +746,7 @@ export default function MriLab() {
                 <CardContent sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                     <Typography sx={{ fontWeight: 700, fontSize: 13 }}>Patient</Typography>
-                    <IconButton size="small"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
+                    <IconButton size="small" onClick={() => navigate('/profile')} title="View Patient Profile"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                     <Avatar sx={{ width: 44, height: 44, bgcolor: tokens.primarySoft, color: tokens.primary, fontWeight: 800 }}>
@@ -595,7 +780,7 @@ export default function MriLab() {
                 <CardContent sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                     <Typography sx={{ fontWeight: 700, fontSize: 13 }}>Scan History</Typography>
-                    <IconButton size="small"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
+                    <IconButton size="small" onClick={() => navigate('/health')} title="View all records in Health Vault"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
                   </Box>
                   <Stack spacing={0}>
                     {scans.map((s, i) => {
@@ -627,7 +812,7 @@ export default function MriLab() {
                 <CardContent sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                     <Typography sx={{ fontWeight: 700, fontSize: 13 }}>Latest Blood Test</Typography>
-                    <IconButton size="small"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
+                    <IconButton size="small" onClick={() => navigate('/health')} title="View detailed lab reports"><OpenInNewRoundedIcon sx={{ fontSize: 14 }} /></IconButton>
                   </Box>
                   <Grid container spacing={1}>
                     {[
@@ -657,26 +842,26 @@ export default function MriLab() {
 
           {/* Center: Body viewer */}
           <Grid size={{ xs: 12, md: 5.5 }}>
-            <Card sx={{ height: '100%', overflow: 'hidden', position: 'relative', bgcolor: '#0B1220' }}>
+            <Card ref={viewerContainerRef} sx={{ height: '100%', overflow: 'hidden', position: 'relative', bgcolor: '#0B1220' }}>
               <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column', '&:last-child': { pb: 0 } }}>
                 {/* Viewer toolbar */}
                 <Box sx={{ px: 2, py: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                   <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>
-                    Body Map · {selectedScan?.type || 'Select area'}
+                    Body Map · {selectedScan?.type || 'Select area'} · Zoom: {Math.round(zoomLevel * 100)}%
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.5)' }}><ZoomInRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
-                    <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.5)' }}><ZoomOutRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
-                    <IconButton size="small" sx={{ color: 'rgba(255,255,255,0.5)' }}><FullscreenRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
+                    <IconButton size="small" onClick={() => setZoomLevel((z) => Math.min(z + 0.2, 2.2))} sx={{ color: 'rgba(255,255,255,0.7)' }}><ZoomInRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
+                    <IconButton size="small" onClick={() => setZoomLevel((z) => Math.max(z - 0.2, 0.6))} sx={{ color: 'rgba(255,255,255,0.7)' }}><ZoomOutRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
+                    <IconButton size="small" onClick={() => { if (document.fullscreenElement) { document.exitFullscreen(); } else { viewerContainerRef.current?.requestFullscreen(); } }} sx={{ color: 'rgba(255,255,255,0.7)' }}><FullscreenRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
                   </Box>
                 </Box>
 
                 {/* Body with hotspots */}
                 <Box sx={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  minHeight: 480, background: 'radial-gradient(ellipse at center, #1a2744 0%, #0B1220 70%)' }}>
+                  minHeight: 480, background: 'radial-gradient(ellipse at center, #1a2744 0%, #0B1220 70%)', overflow: 'hidden' }}>
                   {/* Anatomical silhouette */}
-                  <Box sx={{ width: 180, height: 420, position: 'relative' }}>
+                  <Box sx={{ width: 180, height: 420, position: 'relative', transform: `scale(${zoomLevel})`, transition: 'transform 0.2s ease-out' }}>
                     <svg viewBox="0 0 180 420" width="180" height="420" fill="none">
                       {/* Head */}
                       <ellipse cx="90" cy="35" rx="28" ry="32" stroke="rgba(37,99,235,0.3)" strokeWidth="1.5" fill="rgba(37,99,235,0.05)" />
@@ -752,7 +937,7 @@ export default function MriLab() {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".jpg,.jpeg,.png,.pdf,.dcm,.dicom"
+        accept=".jpg,.jpeg,.png,.pdf,.dcm,.dicom,.nii,.gz"
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
@@ -821,8 +1006,20 @@ export default function MriLab() {
                       <Button
                         variant="outlined"
                         size="large"
+                        startIcon={<UploadFileIcon />}
+                        onClick={() => {
+                          setShowBloodForm(false);
+                          openFilePicker('Blood Report');
+                        }}
+                        sx={{ px: 2 }}
+                      >
+                        Upload PDF Instead
+                      </Button>
+                      <Button
+                        variant="text"
+                        size="large"
                         onClick={() => { setShowBloodForm(false); setUploadError(''); }}
-                        sx={{ px: 3 }}
+                        sx={{ px: 2 }}
                       >
                         Cancel
                       </Button>

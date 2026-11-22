@@ -22,6 +22,7 @@ import PageTransition from '../../components/PageTransition';
 import SectionCard, { StatGrid } from '../../components/SectionCard';
 import { getDoctor } from '../../data/doctors';
 import { tokens } from '../../theme/theme';
+import useStore from '../../store/useStore';
 
 const slots = ['09:00', '09:30', '10:00', '11:30', '14:00', '14:30', '15:00', '16:30'];
 const reviews = [
@@ -33,7 +34,23 @@ const reviews = [
 export default function DoctorProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const doctor = getDoctor(id) || getDoctor('d001');
+
+  const storeDoctors = useStore((s) => s.doctors);
+  const globalDoctorStatus = useStore((s) => s.doctorStatus);
+  const staticDoc = getDoctor(id) || getDoctor('d001');
+  const storeDoc = storeDoctors.find((d) => d.id === id || d._id === id);
+
+  const isArvind = id === 'd001' || !id || staticDoc?.name?.includes('Arvind');
+  const liveStatus = isArvind ? (globalDoctorStatus || storeDoc?.status || 'Available') : (storeDoc?.status || 'Available');
+  const isAvailable = liveStatus === 'Available';
+
+  const doctor = {
+    ...staticDoc,
+    ...storeDoc,
+    status: liveStatus,
+    availableToday: isAvailable,
+  };
+
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(null);
   const [bookingMode, setBookingMode] = useState('video');
@@ -56,11 +73,17 @@ export default function DoctorProfile() {
           {/* Hero Card — filled */}
           <Card sx={{ bgcolor: tokens.primarySoft, border: `1px solid ${tokens.primary}22`, mb: 3 }}>
             <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
-              <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 2, sm: 3 },
+                alignItems: { xs: 'center', sm: 'flex-start' },
+                textAlign: { xs: 'center', sm: 'left' },
+              }}>
                 <Box sx={{ position: 'relative', flexShrink: 0 }}>
                   <Avatar src={doctor.photo}
-                    sx={{ width: 100, height: 100, borderRadius: 3, border: `3px solid #fff`,
-                      bgcolor: tokens.primary, color: '#fff', fontWeight: 800, fontSize: 28 }}>
+                    sx={{ width: { xs: 84, sm: 100 }, height: { xs: 84, sm: 100 }, borderRadius: 3, border: `3px solid #fff`,
+                      bgcolor: tokens.primary, color: '#fff', fontWeight: 800, fontSize: { xs: 24, sm: 28 } }}>
                     {doctor.initials}
                   </Avatar>
                   {doctor.verified && (
@@ -77,7 +100,18 @@ export default function DoctorProfile() {
                   <Typography sx={{ fontSize: 15, color: tokens.primary, fontWeight: 600, mb: 1.5 }}>
                     {doctor.specialty}{doctor.subSpecialty ? ` · ${doctor.subSpecialty}` : ''}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+                    <Chip
+                      size="small"
+                      label={liveStatus === 'Available' ? '🟢 Online / Available' : liveStatus === 'Busy' ? '🟡 In Consultation' : '⚪ Currently Offline'}
+                      sx={{
+                        bgcolor: liveStatus === 'Available' ? tokens.successSoft : liveStatus === 'Busy' ? '#FEF3C7' : '#F1F5F9',
+                        color: liveStatus === 'Available' ? tokens.success : liveStatus === 'Busy' ? '#D97706' : tokens.textSecondary,
+                        fontWeight: 700,
+                        fontSize: 12,
+                        border: `1px solid ${liveStatus === 'Available' ? `${tokens.success}33` : liveStatus === 'Busy' ? '#F59E0B44' : '#CBD5E1'}`,
+                      }}
+                    />
                     <Chip size="small" icon={<LocationOnOutlinedIcon />} label={doctor.hospital}
                       sx={{ bgcolor: '#fff', fontWeight: 600, fontSize: 12,
                         '& .MuiChip-icon': { fontSize: 14, color: tokens.textTertiary } }} />
@@ -237,7 +271,7 @@ export default function DoctorProfile() {
 
               {/* Time Slots */}
               <Typography sx={{ fontWeight: 700, mb: 1.5, mt: 1, fontSize: 13, color: tokens.textSecondary }}>Available Slots</Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)' }, gap: 1 }}>
                 {slots.map((s) => (
                   <Box key={s} onClick={() => setSlot(s)}
                     sx={{ py: 1, textAlign: 'center', borderRadius: 2, cursor: 'pointer', fontWeight: 700, fontSize: 13,
@@ -257,15 +291,31 @@ export default function DoctorProfile() {
               </Button>
             </SectionCard>
 
-            {/* Quick info card — filled */}
-            <Card sx={{ bgcolor: tokens.successSoft, border: `1px solid ${tokens.success}22` }}>
+            {/* Quick info card — dynamic live status */}
+            <Card sx={{
+              bgcolor: liveStatus === 'Available' ? tokens.successSoft : liveStatus === 'Busy' ? '#FEF3C7' : '#F1F5F9',
+              border: `1px solid ${liveStatus === 'Available' ? `${tokens.success}22` : liveStatus === 'Busy' ? '#F59E0B33' : '#CBD5E1'}`
+            }}>
               <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                  <AccessTimeRoundedIcon sx={{ fontSize: 16, color: tokens.success }} />
-                  <Typography sx={{ fontWeight: 700, fontSize: 13, color: tokens.success }}>Available Today</Typography>
+                  <AccessTimeRoundedIcon sx={{
+                    fontSize: 16,
+                    color: liveStatus === 'Available' ? tokens.success : liveStatus === 'Busy' ? '#D97706' : tokens.textSecondary
+                  }} />
+                  <Typography sx={{
+                    fontWeight: 700,
+                    fontSize: 13,
+                    color: liveStatus === 'Available' ? tokens.success : liveStatus === 'Busy' ? '#D97706' : tokens.textSecondary
+                  }}>
+                    {liveStatus === 'Available' ? 'Available Today' : liveStatus === 'Busy' ? 'Currently in Consultation' : 'Doctor is Currently Offline'}
+                  </Typography>
                 </Box>
                 <Typography sx={{ fontSize: 12, color: tokens.textSecondary, lineHeight: 1.6 }}>
-                  Next available slot: {doctor.nextSlot || 'Today 2:00 PM'}. Average wait time is under 5 minutes for video consultations.
+                  {liveStatus === 'Available'
+                    ? `Next available slot: ${doctor.nextSlot || 'Today 3:00 PM'}. Average wait time is under 5 minutes for video consultations.`
+                    : liveStatus === 'Busy'
+                    ? 'Doctor is attending to another patient right now. Instant consult queue is temporarily paused; next session opens shortly.'
+                    : 'Doctor is not taking instant online appointments right now. You can book an advance consultation for tomorrow or message the doctor.'}
                 </Typography>
               </CardContent>
             </Card>

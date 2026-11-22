@@ -1,25 +1,37 @@
-import { Box, Avatar, Typography, Divider } from '@mui/material';
+import { useState } from 'react';
+import {
+  Box, Avatar, Typography, Divider, IconButton, Drawer, List,
+  ListItemButton, ListItemIcon, ListItemText, Paper,
+} from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
+import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
+import InsightsRoundedIcon from '@mui/icons-material/InsightsRounded';
 import GppMaybeOutlinedIcon from '@mui/icons-material/GppMaybeOutlined';
+import GppMaybeRoundedIcon from '@mui/icons-material/GppMaybeRounded';
 import ShieldRoundedIcon from '@mui/icons-material/ShieldRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { useAuth } from '../context/AuthContext';
 import { tokens } from '../theme/theme';
 
 const items = [
-  { label: 'Overview', icon: DashboardOutlinedIcon, path: '/admin' },
-  { label: 'Verification', icon: VerifiedOutlinedIcon, path: '/admin/verification' },
-  { label: 'Analytics', icon: InsightsOutlinedIcon, path: '/admin/analytics' },
-  { label: 'Moderation', icon: GppMaybeOutlinedIcon, path: '/admin/moderation' },
+  { label: 'Overview', icon: DashboardOutlinedIcon, iconActive: DashboardRoundedIcon, path: '/admin' },
+  { label: 'Verification', icon: VerifiedOutlinedIcon, iconActive: VerifiedRoundedIcon, path: '/admin/verification' },
+  { label: 'Analytics', icon: InsightsOutlinedIcon, iconActive: InsightsRoundedIcon, path: '/admin/analytics' },
+  { label: 'Moderation', icon: GppMaybeOutlinedIcon, iconActive: GppMaybeRoundedIcon, path: '/admin/moderation' },
 ];
 
 export default function AdminShell() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, logout } = useAuth();
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -27,11 +39,54 @@ export default function AdminShell() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: tokens.canvas }}>
-      <Box sx={{ width: 248, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
-        bgcolor: tokens.surface, borderRight: `1px solid ${tokens.border}`,
-        display: { xs: 'none', md: 'flex' }, flexDirection: 'column', p: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, minHeight: '100vh', bgcolor: tokens.canvas }}>
+      {/* Mobile Top Header */}
+      <Box
+        sx={{
+          display: { xs: 'flex', md: 'none' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 2,
+          py: 1.25,
+          position: 'sticky',
+          top: 0,
+          zIndex: 1100,
+          bgcolor: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: `1px solid ${tokens.border}`,
+        }}
+      >
+        <Box onClick={() => navigate('/admin')} sx={{ display: 'flex', alignItems: 'center', gap: 1.25, cursor: 'pointer' }}>
+          <Box sx={{ width: 30, height: 30, borderRadius: '8px', background: tokens.blueGradient, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ShieldRoundedIcon sx={{ color: '#fff', fontSize: 16 }} />
+          </Box>
+          <Box>
+            <Typography sx={{ fontWeight: 800, fontSize: 15, color: tokens.primary, lineHeight: 1 }}>Sushruth</Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: 9, letterSpacing: '0.08em', color: tokens.teal, textTransform: 'uppercase' }}>
+              Admin Console
+            </Typography>
+          </Box>
+        </Box>
 
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: tokens.textPrimary, fontSize: 11, fontWeight: 700 }}>AD</Avatar>
+          <IconButton
+            size="small"
+            onClick={() => setMobileDrawerOpen(true)}
+            sx={{ color: tokens.textSecondary, bgcolor: tokens.surfaceMuted, width: 34, height: 34, borderRadius: '8px' }}
+            aria-label="Open Admin Menu"
+          >
+            <MenuRoundedIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Desktop Sidebar */}
+      <Box sx={{
+        width: 248, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
+        bgcolor: tokens.surface, borderRight: `1px solid ${tokens.border}`,
+        display: { xs: 'none', md: 'flex' }, flexDirection: 'column', p: 2,
+      }}>
         {/* Brand */}
         <Box onClick={() => navigate('/admin')}
           sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 3.5, px: 1, cursor: 'pointer' }}>
@@ -47,7 +102,7 @@ export default function AdminShell() {
           </Box>
         </Box>
 
-        {/* Nav */}
+        {/* Nav Links */}
         <Box sx={{ flex: 1 }}>
           {items.map((it) => {
             const active = pathname === it.path;
@@ -71,6 +126,7 @@ export default function AdminShell() {
           })}
         </Box>
 
+        {/* Admin profile card & logout */}
         <Box sx={{ borderTop: `1px solid ${tokens.border}`, pt: 1.5, mt: 0.5 }}>
           <Box
             onClick={() => navigate('/admin')}
@@ -114,9 +170,141 @@ export default function AdminShell() {
         </Box>
       </Box>
 
-      <Box component="main" sx={{ flex: 1, minWidth: 0, height: '100vh', overflowY: 'auto', px: { xs: 2, md: 3.5 }, py: 3.5 }}>
+      {/* Admin Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              width: '80vw',
+              maxWidth: 320,
+              bgcolor: '#fff',
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${tokens.border}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+            <Avatar sx={{ width: 38, height: 38, bgcolor: tokens.textPrimary, fontWeight: 700, fontSize: 12 }}>AD</Avatar>
+            <Box>
+              <Typography sx={{ fontWeight: 800, fontSize: 14 }}>{user?.name || 'Admin Console'}</Typography>
+              <Typography sx={{ fontSize: 11.5, color: tokens.textSecondary }}>Platform Operations</Typography>
+            </Box>
+          </Box>
+          <IconButton size="small" onClick={() => setMobileDrawerOpen(false)}>
+            <CloseRoundedIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+
+        <List sx={{ flex: 1, p: 1.5 }}>
+          {items.map((it) => {
+            const active = pathname === it.path;
+            const Icon = active && it.iconActive ? it.iconActive : it.icon;
+            return (
+              <ListItemButton
+                key={it.path}
+                onClick={() => { setMobileDrawerOpen(false); navigate(it.path); }}
+                sx={{
+                  borderRadius: '10px',
+                  mb: 0.75,
+                  bgcolor: active ? tokens.primarySoft : 'transparent',
+                  color: active ? tokens.primary : tokens.textPrimary,
+                  fontWeight: active ? 700 : 500,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: active ? tokens.primary : tokens.textSecondary }}>
+                  <Icon sx={{ fontSize: 20 }} />
+                </ListItemIcon>
+                <ListItemText primary={it.label} primaryTypographyProps={{ fontSize: 14, fontWeight: active ? 700 : 500 }} />
+              </ListItemButton>
+            );
+          })}
+        </List>
+
+        <Box sx={{ p: 2, borderTop: `1px solid ${tokens.border}`, bgcolor: tokens.surfaceMuted }}>
+          <ListItemButton
+            onClick={() => { setMobileDrawerOpen(false); navigate('/dashboard'); }}
+            sx={{ borderRadius: '10px', mb: 1, color: tokens.textSecondary }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}><ArrowBackRoundedIcon fontSize="small" /></ListItemIcon>
+            <ListItemText primary="Patient App View" primaryTypographyProps={{ fontSize: 13, fontWeight: 600 }} />
+          </ListItemButton>
+
+          <ListItemButton
+            onClick={() => { setMobileDrawerOpen(false); handleLogout(); }}
+            sx={{ borderRadius: '10px', color: tokens.danger, bgcolor: tokens.dangerSoft }}
+          >
+            <ListItemIcon sx={{ minWidth: 36, color: tokens.danger }}><LogoutRoundedIcon fontSize="small" /></ListItemIcon>
+            <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: 13, fontWeight: 700 }} />
+          </ListItemButton>
+        </Box>
+      </Drawer>
+
+      {/* Main Content Area */}
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          minHeight: '100vh',
+          overflowY: 'auto',
+          px: { xs: 1.5, sm: 2.5, md: 3.5 },
+          py: { xs: 2, md: 3.5 },
+          pb: { xs: 10, md: 3.5 },
+        }}
+      >
         <Outlet />
       </Box>
+
+      {/* Admin Mobile Bottom Navigation */}
+      <Paper
+        elevation={0}
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1100,
+          display: { xs: 'block', md: 'none' },
+          bgcolor: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(20px)',
+          borderTop: `1px solid ${tokens.border}`,
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
+          pb: 'max(8px, env(safe-area-inset-bottom, 8px))',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', height: 60, px: 0.5 }}>
+          {items.map((item) => {
+            const active = pathname === item.path;
+            const Icon = active && item.iconActive ? item.iconActive : item.icon;
+            return (
+              <Box
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                sx={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 0.75,
+                  cursor: 'pointer',
+                  color: active ? tokens.primary : tokens.textSecondary,
+                }}
+              >
+                <Icon sx={{ fontSize: 21 }} />
+                <Typography sx={{ fontSize: 10, fontWeight: active ? 700 : 500, mt: 0.25 }}>
+                  {item.label}
+                </Typography>
+              </Box>
+            );
+          })}
+        </Box>
+      </Paper>
     </Box>
   );
 }

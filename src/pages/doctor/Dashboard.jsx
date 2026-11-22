@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Select, MenuItem, Chip, List, ListItemButton,
   ListItemText, ListItemIcon, Avatar, Button, IconButton, Stack,
@@ -21,23 +22,12 @@ import useStore from '../../store/useStore';
 import { useAuth } from '../../context/AuthContext';
 import { tokens } from '../../theme/theme';
 import { patientPhotos } from '../../data/assets';
+import { doctorAPI } from '../../services/api';
 
-const queue = [
+const defaultQueue = [
   { time: '10:00 AM', name: 'Meera Sharma', age: 34, type: 'Video', photo: patientPhotos.meera, current: true },
   { time: '10:30 AM', name: 'Rohan Sharma', age: 37, type: 'In-Clinic', photo: patientPhotos.rohan, current: false },
   { time: '11:15 AM', name: 'Aanya Iyer', age: 28, type: 'Video', photo: patientPhotos.aanya, current: false },
-];
-const pending = [
-  { icon: EditNoteOutlinedIcon, text: '2 prescriptions to sign', action: 'Review' },
-  { icon: PsychologyOutlinedIcon, text: '1 MRI to review', action: 'Review Now', badge: true },
-  { icon: StarOutlineIcon, text: '3 reviews to respond', action: 'Respond' },
-];
-
-const stats = [
-  { label: "Today's Patients", value: 8, icon: GroupRoundedIcon, color: tokens.primary, bg: tokens.primarySoft },
-  { label: 'Your Rating', value: '4.8', icon: StarRoundedIcon, color: tokens.warning, bg: tokens.warningSoft },
-  { label: 'Week Earnings', value: '₹24,400', icon: PaymentsRoundedIcon, color: tokens.success, bg: tokens.successSoft },
-  { label: 'Pending Actions', value: 3, icon: PendingActionsRoundedIcon, color: '#7C3AED', bg: '#F3F0FF' },
 ];
 
 export default function DoctorDashboard() {
@@ -45,7 +35,59 @@ export default function DoctorDashboard() {
   const { user } = useAuth();
   const status = useStore((s) => s.doctorStatus);
   const setStatus = useStore((s) => s.setDoctorStatus);
+  const updateStatusAPI = useStore((s) => s.updateDoctorStatusAPI);
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const handleStatusChange = async (newStatus) => {
+    setStatus(newStatus);
+    try {
+      if (updateStatusAPI) {
+        await updateStatusAPI(newStatus, newStatus === 'Available');
+      }
+    } catch (err) {
+      // local store already updated
+    }
+  };
+
+  const [liveStats, setLiveStats] = useState({
+    todayCount: 8,
+    totalCount: 24,
+    pendingActions: 3,
+    rating: 4.8,
+    consultationFee: 600,
+    queue: defaultQueue,
+  });
+
+  useEffect(() => {
+    doctorAPI.getMyDashboardStats()
+      .then(({ data }) => {
+        if (data) {
+          setLiveStats((prev) => ({
+            ...prev,
+            todayCount: data.todayCount || prev.todayCount,
+            totalCount: data.totalCount || prev.totalCount,
+            pendingActions: data.pendingActions !== undefined ? data.pendingActions : prev.pendingActions,
+            rating: data.rating || prev.rating,
+            consultationFee: data.consultationFee || prev.consultationFee,
+            queue: data.queue && data.queue.length > 0 ? data.queue : prev.queue,
+          }));
+        }
+      })
+      .catch((err) => console.warn('Could not fetch doctor stats from API:', err.message));
+  }, []);
+
+  const stats = [
+    { label: "Today's Patients", value: liveStats.todayCount, icon: GroupRoundedIcon, color: tokens.primary, bg: tokens.primarySoft },
+    { label: 'Your Rating', value: liveStats.rating, icon: StarRoundedIcon, color: tokens.warning, bg: tokens.warningSoft },
+    { label: 'Session Fee', value: `₹${liveStats.consultationFee}`, icon: PaymentsRoundedIcon, color: tokens.success, bg: tokens.successSoft },
+    { label: 'Pending Actions', value: liveStats.pendingActions, icon: PendingActionsRoundedIcon, color: '#7C3AED', bg: '#F3F0FF' },
+  ];
+
+  const pending = [
+    { icon: EditNoteOutlinedIcon, text: `${liveStats.pendingActions || 2} prescriptions to review`, action: 'Review' },
+    { icon: PsychologyOutlinedIcon, text: '1 MRI to review', action: 'Review Now', badge: true },
+    { icon: StarOutlineIcon, text: 'Active consultation queue', action: 'Respond' },
+  ];
 
   const docName = user?.name || 'Dr. Arvind Rao';
   const docSpecialty = user?.doctorProfile?.specialty || 'Neurologist';
@@ -89,7 +131,7 @@ export default function DoctorDashboard() {
           <Typography sx={{ fontSize: 13, color: tokens.textSecondary }}>{docSpecialty} · {docHospital} · {today}</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Select value={status} onChange={(e) => setStatus(e.target.value)} size="small"
+          <Select value={status} onChange={(e) => handleStatusChange(e.target.value)} size="small"
             sx={{ borderRadius: '100px', fontWeight: 700, fontSize: 13,
               color: status === 'Available' ? tokens.success : status === 'Busy' ? tokens.warning : tokens.textSecondary,
               '& fieldset': { borderColor: status === 'Available' ? tokens.success : tokens.border } }}>
@@ -129,8 +171,8 @@ export default function DoctorDashboard() {
             menu
           >
             <Stack spacing={0.5}>
-              {queue.map((q) => (
-                <Box key={q.name}
+              {(liveStats.queue || []).map((q) => (
+                <Box key={q.id || q.name}
                   sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1, borderRadius: 2,
                     bgcolor: q.current ? tokens.primarySoft : 'transparent',
                     border: q.current ? `1px solid ${tokens.primary}22` : '1px solid transparent' }}>

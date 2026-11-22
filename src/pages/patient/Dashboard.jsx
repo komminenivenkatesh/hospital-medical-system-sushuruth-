@@ -298,7 +298,7 @@ function AIChatBot({ navigate }) {
                         <Typography sx={{ fontWeight: 700, fontSize: 11.5 }} noWrap>{doc.name}</Typography>
                         <Typography sx={{ fontSize: 10.5, color: tokens.textSecondary }}>{doc.specialty}</Typography>
                       </Box>
-                      <Button size="small" variant="contained" sx={{ px: 1.25, py: 0.2, fontSize: 10, minWidth: 0 }}>Book</Button>
+                      <Button size="small" variant="contained" onClick={(e) => { e.stopPropagation(); navigate(`/booking/${doc.id}`); }} sx={{ px: 1.25, py: 0.2, fontSize: 10, minWidth: 0 }}>Book</Button>
                     </Box>
                   );
                 })()}
@@ -436,13 +436,13 @@ export default function Dashboard() {
                 <Grid key={s.label} size={4}>
                   <Card sx={{ cursor: 'pointer', '&:hover': { borderColor: s.color } }}
                     onClick={() => navigate(s.label === 'Appointments' ? '/appointments' : s.label === 'MRI Reports' ? '/mri' : '/health')}>
-                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, textAlign: 'center' }}>
-                      <Box sx={{ width: 40, height: 40, borderRadius: 2.5, bgcolor: `${s.color}12`, mx: 'auto', mb: 1,
+                    <CardContent sx={{ p: { xs: 1.25, sm: 2 }, '&:last-child': { pb: { xs: 1.25, sm: 2 } }, textAlign: 'center' }}>
+                      <Box sx={{ width: { xs: 34, sm: 40 }, height: { xs: 34, sm: 40 }, borderRadius: 2.5, bgcolor: `${s.color}12`, mx: 'auto', mb: 1,
                         display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <s.icon sx={{ fontSize: 20, color: s.color }} />
+                        <s.icon sx={{ fontSize: { xs: 17, sm: 20 }, color: s.color }} />
                       </Box>
-                      <Typography sx={{ fontWeight: 800, fontSize: 28, color: s.color, lineHeight: 1 }}>{s.value}</Typography>
-                      <Typography sx={{ fontSize: 11, color: tokens.textSecondary, fontWeight: 600 }}>{s.sub}</Typography>
+                      <Typography sx={{ fontWeight: 800, fontSize: { xs: 20, sm: 28 }, color: s.color, lineHeight: 1 }}>{s.value}</Typography>
+                      <Typography sx={{ fontSize: { xs: 9.5, sm: 11 }, color: tokens.textSecondary, fontWeight: 600, mt: 0.25 }} noWrap>{s.sub}</Typography>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -561,7 +561,13 @@ export default function Dashboard() {
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <Button fullWidth variant="contained" size="small" sx={{ fontWeight: 700 }}
-                        onClick={() => navigate(`/consult/${a.id}`)}>
+                        onClick={() => navigate(`/consult/${a.id}`, {
+                          state: {
+                            doctorName: a.doctorName,
+                            specialty: `${a.specialty} · ${a.hospital || 'Hospital'}`,
+                            doctorId: a.doctorId,
+                          },
+                        })}>
                         Join Call
                       </Button>
                       <Button fullWidth variant="outlined" size="small" sx={{ fontWeight: 700 }}
@@ -605,7 +611,11 @@ export default function Dashboard() {
                   sx={{ width: 40, height: 40, bgcolor: tokens.textPrimary, color: '#fff', '&:hover': { bgcolor: '#1f2937' } }}>
                   <ChatBubbleOutlineRoundedIcon sx={{ fontSize: 18 }} />
                 </IconButton>
-                <IconButton sx={{ width: 40, height: 40, border: `1.5px solid ${tokens.border}`, color: tokens.textSecondary }}>
+                <IconButton
+                  onClick={() => navigate('/consult/a001')}
+                  title="Direct clinical audio/video line"
+                  sx={{ width: 40, height: 40, border: `1.5px solid ${tokens.border}`, color: tokens.textSecondary, '&:hover': { bgcolor: tokens.surfaceMuted } }}
+                >
                   <PhoneInTalkOutlinedIcon sx={{ fontSize: 18 }} />
                 </IconButton>
                 <Button fullWidth variant="contained" endIcon={<ArrowForwardRoundedIcon />}

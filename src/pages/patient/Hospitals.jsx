@@ -52,7 +52,7 @@ export default function Hospitals() {
 
   return (
     <PageTransition>
-      <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Box sx={{ p: { xs: 0, md: 2 } }}>
         <Box sx={{ mb: 4 }}>
           <Typography sx={{ fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em', mb: 1 }}>
             Trusted Hospitals, Nationwide

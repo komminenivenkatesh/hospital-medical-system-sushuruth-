@@ -39,6 +39,7 @@ import Upgrade from './pages/patient/Upgrade';
 // Doctor
 import DoctorDashboard from './pages/doctor/Dashboard';
 import DoctorPatients from './pages/doctor/Patients';
+import DoctorChat from './pages/doctor/Chat';
 import DoctorConsultRoom from './pages/doctor/ConsultRoom';
 import MriReview from './pages/doctor/MriReview';
 import Earnings from './pages/doctor/Earnings';
@@ -119,6 +120,7 @@ function AnimatedRoutes() {
         <Route element={<ProtectedRoute allowedRoles={['doctor']}><DoctorShell /></ProtectedRoute>}>
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/patients" element={<DoctorPatients />} />
+          <Route path="/doctor/chat" element={<DoctorChat />} />
           <Route path="/doctor/mri-review/:id" element={<MriReview />} />
           <Route path="/doctor/earnings" element={<Earnings />} />
           <Route path="/doctor/availability" element={<Availability />} />

@@ -10,7 +10,7 @@ export const connectSocket = () => {
   if (socket?.connected) return socket;
 
   socket = io('/', {
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
     autoConnect: true,
   });
 
@@ -92,4 +92,79 @@ export const onUserStopTyping = (callback) => {
 export const onDoctorStatusUpdated = (callback) => {
   getSocket().on('doctor_status_updated', callback);
   return () => getSocket().off('doctor_status_updated', callback);
+};
+
+// ---- WebRTC Video Consultation Helpers ----
+export const joinVideoRoom = (roomId, user) => {
+  getSocket().emit('video_join_room', { roomId, user });
+};
+
+export const sendWebRtcOffer = ({ roomId, sdp, callerInfo }) => {
+  getSocket().emit('webrtc_offer', { roomId, sdp, callerInfo });
+};
+
+export const sendWebRtcAnswer = ({ roomId, sdp }) => {
+  getSocket().emit('webrtc_answer', { roomId, sdp });
+};
+
+export const sendIceCandidate = ({ roomId, candidate }) => {
+  getSocket().emit('webrtc_ice_candidate', { roomId, candidate });
+};
+
+export const sendMediaState = ({ roomId, mic, cam, screen }) => {
+  getSocket().emit('media_state_change', { roomId, mic, cam, screen });
+};
+
+export const sendVideoChatMessage = ({ roomId, sender, senderType, content }) => {
+  getSocket().emit('video_chat_message', { roomId, sender, senderType, content, timestamp: new Date().toISOString() });
+};
+
+export const emitEndVideoCall = ({ roomId, reason, prescriptionId }) => {
+  getSocket().emit('end_video_call', { roomId, reason, prescriptionId });
+};
+
+// ---- Video Event Listeners ----
+export const onVideoRoomJoined = (callback) => {
+  getSocket().on('video_room_joined', callback);
+  return () => getSocket().off('video_room_joined', callback);
+};
+
+export const onUserJoinedVideo = (callback) => {
+  getSocket().on('user_joined_video', callback);
+  return () => getSocket().off('user_joined_video', callback);
+};
+
+export const onWebRtcOffer = (callback) => {
+  getSocket().on('webrtc_offer', callback);
+  return () => getSocket().off('webrtc_offer', callback);
+};
+
+export const onWebRtcAnswer = (callback) => {
+  getSocket().on('webrtc_answer', callback);
+  return () => getSocket().off('webrtc_answer', callback);
+};
+
+export const onIceCandidate = (callback) => {
+  getSocket().on('webrtc_ice_candidate', callback);
+  return () => getSocket().off('webrtc_ice_candidate', callback);
+};
+
+export const onPeerMediaStateChanged = (callback) => {
+  getSocket().on('peer_media_state_changed', callback);
+  return () => getSocket().off('peer_media_state_changed', callback);
+};
+
+export const onVideoChatMessage = (callback) => {
+  getSocket().on('video_chat_message', callback);
+  return () => getSocket().off('video_chat_message', callback);
+};
+
+export const onVideoCallEnded = (callback) => {
+  getSocket().on('video_call_ended', callback);
+  return () => getSocket().off('video_call_ended', callback);
+};
+
+export const onPeerLeftVideo = (callback) => {
+  getSocket().on('peer_left_video', callback);
+  return () => getSocket().off('peer_left_video', callback);
 };

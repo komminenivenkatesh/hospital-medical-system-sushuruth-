@@ -4,17 +4,34 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 import { motion } from 'framer-motion';
 import { tokens } from '../theme/theme';
 
-export default function SectionCard({ title, arrow, menu, action, children, sx, contentSx, noPadding, tag, tagColor = tokens.primary }) {
+export default function SectionCard({
+  title,
+  arrow,
+  menu,
+  action,
+  children,
+  sx,
+  contentSx,
+  noPadding,
+  tag,
+  tagColor = tokens.primary,
+  fullHeight = false,
+}) {
+  const isFull = fullHeight || sx?.height === '100%';
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      style={{ height: '100%' }}
+      style={{
+        height: isFull ? '100%' : 'auto',
+        display: isFull ? 'flex' : 'block',
+        flexDirection: 'column',
+      }}
     >
-      <Card sx={{ height: '100%', ...sx }}>
-        <CardContent sx={{ p: noPadding ? 0 : 3, '&:last-child': { pb: noPadding ? 0 : 3 }, ...contentSx, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Card sx={{ height: isFull ? '100%' : 'auto', display: 'flex', flexDirection: 'column', ...sx }}>
+        <CardContent sx={{ p: noPadding ? 0 : 3, '&:last-child': { pb: noPadding ? 0 : 3 }, ...contentSx, display: 'flex', flexDirection: 'column', flex: 1 }}>
           {title && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5, ...(noPadding ? { px: 3, pt: 3 } : {}) }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -33,7 +50,7 @@ export default function SectionCard({ title, arrow, menu, action, children, sx, 
               </Box>
               <Box sx={{ display: 'flex', gap: 0.5, ml: 2 }}>
                 {menu && (
-                  <IconButton size="small" sx={{ width: 32, height: 32, bgcolor: tokens.surfaceMuted, '&:hover': { bgcolor: tokens.border } }}>
+                  <IconButton size="small" onClick={action} sx={{ width: 32, height: 32, bgcolor: tokens.surfaceMuted, '&:hover': { bgcolor: tokens.border } }}>
                     <MoreHorizRoundedIcon sx={{ fontSize: 18, color: tokens.textSecondary }} />
                   </IconButton>
                 )}
@@ -56,14 +73,29 @@ export default function SectionCard({ title, arrow, menu, action, children, sx, 
 
 export function PillTabs({ tabs, value, onChange }) {
   return (
-    <Box sx={{ bgcolor: tokens.surfaceMuted, borderRadius: 100, p: 0.5, display: 'inline-flex', gap: 0.5, mb: 3 }}>
+    <Box
+      sx={{
+        bgcolor: tokens.surfaceMuted,
+        borderRadius: 100,
+        p: 0.5,
+        display: 'inline-flex',
+        gap: 0.5,
+        mb: 3,
+        maxWidth: '100%',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}
+    >
       {tabs.map((t, i) => (
         <Box key={t} onClick={() => onChange(i)}
           sx={{
-            px: 2.5, py: 1, borderRadius: 100, cursor: 'pointer',
+            px: { xs: 2, sm: 2.5 }, py: 1, borderRadius: 100, cursor: 'pointer',
             bgcolor: value === i ? '#fff' : 'transparent',
             boxShadow: value === i ? tokens.cardShadow : 'none',
-            fontWeight: value === i ? 700 : 600, fontSize: 13,
+            fontWeight: value === i ? 700 : 600, fontSize: { xs: 12, sm: 13 },
+            whiteSpace: 'nowrap',
             color: value === i ? tokens.primary : tokens.textSecondary,
             transition: 'all 200ms ease',
             '&:hover': { color: tokens.textPrimary, bgcolor: value === i ? '#fff' : 'rgba(0,0,0,0.02)' }

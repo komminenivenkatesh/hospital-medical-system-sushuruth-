@@ -4,6 +4,7 @@ const {
   getConversations,
   getMessages,
   sendMessage,
+  getOrCreateConversation,
 } = require('../controllers/chatController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -16,6 +17,13 @@ router.use(protect);
  * @access  Private
  */
 router.get('/conversations', getConversations);
+
+/**
+ * @route   POST /api/chat/conversations
+ * @desc    Find or create a conversation with a recipient
+ * @access  Private
+ */
+router.post('/conversations', getOrCreateConversation);
 
 /**
  * @route   GET /api/chat/conversations/:id/messages

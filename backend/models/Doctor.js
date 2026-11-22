@@ -32,6 +32,45 @@ const doctorSchema = new mongoose.Schema(
       default: 0,
       min: [0, 'Consultation fee cannot be negative']
     },
+    videoFee: {
+      type: Number,
+      default: 600,
+      min: [0, 'Video consultation fee cannot be negative']
+    },
+    bio: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    languages: {
+      type: [String],
+      default: ['English', 'Hindi']
+    },
+    weeklySchedule: {
+      type: Map,
+      of: new mongoose.Schema({
+        enabled: { type: Boolean, default: true },
+        startTime: { type: String, default: '09:00' },
+        endTime: { type: String, default: '17:00' }
+      }, { _id: false }),
+      default: () => ({
+        Mon: { enabled: true, startTime: '09:00', endTime: '17:00' },
+        Tue: { enabled: true, startTime: '09:00', endTime: '17:00' },
+        Wed: { enabled: true, startTime: '09:00', endTime: '17:00' },
+        Thu: { enabled: true, startTime: '09:00', endTime: '17:00' },
+        Fri: { enabled: true, startTime: '09:00', endTime: '17:00' },
+        Sat: { enabled: false, startTime: '09:00', endTime: '13:00' },
+        Sun: { enabled: false, startTime: '09:00', endTime: '13:00' }
+      })
+    },
+    slotDuration: {
+      type: String,
+      default: '20min'
+    },
+    blockedDates: {
+      type: [String],
+      default: []
+    },
     availableToday: {
       type: Boolean,
       default: true

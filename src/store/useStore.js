@@ -46,7 +46,9 @@ const useStore = create((set, get) => ({
     set((s) => ({
       doctorStatus: status,
       doctors: s.doctors.map((d) =>
-        d.id === 'd001' ? { ...d, availableToday: status === 'Available' } : d
+        (d.id === 'd001' || d._id === 'd001' || d.name?.includes('Arvind'))
+          ? { ...d, status, availableToday: status === 'Available' }
+          : d
       ),
     })),
 

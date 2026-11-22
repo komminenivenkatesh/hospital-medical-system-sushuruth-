@@ -45,6 +45,12 @@ export const doctorAPI = {
   updateStatus: (data) => api.patch('/doctors/status', data),
   getVerifications: (params = {}) => api.get('/doctors/verifications', { params }),
   verifyDoctor: (id, verificationStatus) => api.patch(`/doctors/${id}/verify`, { verificationStatus }),
+  getMyPatients: () => api.get('/doctors/my/patients'),
+  getMyDashboardStats: () => api.get('/doctors/my/dashboard-stats'),
+  getMyProfile: () => api.get('/doctors/my/profile'),
+  updateMyProfile: (data) => api.put('/doctors/my/profile', data),
+  getMyAvailability: () => api.get('/doctors/my/availability'),
+  updateMyAvailability: (data) => api.put('/doctors/my/availability', data),
 };
 
 // ---- Hospital API ----
@@ -54,6 +60,15 @@ export const hospitalAPI = {
   getVerifications: (params = {}) => api.get('/hospitals/verifications', { params }),
   verifyHospital: (id, verificationStatus) => api.patch(`/hospitals/${id}/verify`, { verificationStatus }),
   updateMyHospital: (data) => api.patch('/hospitals/me', data),
+};
+
+// ---- Health Records & Prescriptions API ----
+export const healthAPI = {
+  getSummary: () => api.get('/health/summary'),
+  getPrescriptions: () => api.get('/health/prescriptions'),
+  createPrescription: (data) => api.post('/health/prescriptions', data),
+  getLabReports: () => api.get('/health/lab-reports'),
+  createLabReport: (data) => api.post('/health/lab-reports', data),
 };
 
 // ---- Appointment API ----
@@ -66,10 +81,11 @@ export const appointmentAPI = {
 // ---- Chat API ----
 export const chatAPI = {
   getConversations: () => api.get('/chat/conversations'),
+  getOrCreate: (recipientId) => api.post('/chat/conversations', { recipientId }),
   getMessages: (conversationId, params = {}) =>
     api.get(`/chat/conversations/${conversationId}/messages`, { params }),
-  sendMessage: (conversationId, content) =>
-    api.post(`/chat/conversations/${conversationId}/messages`, { content }),
+  sendMessage: (conversationId, content, senderType) =>
+    api.post(`/chat/conversations/${conversationId}/messages`, { content, senderType }),
 };
 
 // ---- MRI API ----
@@ -108,6 +124,41 @@ export const mriAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+};
+
+// ---- Payments API ----
+export const paymentAPI = {
+  getHistory: () => api.get('/payments/history'),
+  createPayment: (data) => api.post('/payments', data),
+  getDoctorEarnings: () => api.get('/payments/doctor/earnings'),
+};
+
+// ---- Family API ----
+export const familyAPI = {
+  getAll: () => api.get('/family'),
+  add: (data) => api.post('/family', data),
+  update: (id, data) => api.put(`/family/${id}`, data),
+  delete: (id) => api.delete(`/family/${id}`),
+};
+
+// ---- Articles / Health Library API ----
+export const articleAPI = {
+  getAll: (params = {}) => api.get('/articles', { params }),
+  getById: (id) => api.get(`/articles/${id}`),
+};
+
+// ---- Admin Intelligence API ----
+export const adminAPI = {
+  getOverview: () => api.get('/admin/overview'),
+  getAnalytics: () => api.get('/admin/analytics'),
+};
+
+// ---- AI Assistant API ----
+export const aiAPI = {
+  getConversations: () => api.get('/ai/conversations'),
+  getConversationById: (id) => api.get(`/ai/conversations/${id}`),
+  sendMessage: (prompt, conversationId) => api.post('/ai/chat', { prompt, conversationId }),
+  deleteConversation: (id) => api.delete(`/ai/conversations/${id}`),
 };
 
 export default api;

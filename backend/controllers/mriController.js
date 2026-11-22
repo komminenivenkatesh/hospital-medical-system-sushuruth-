@@ -35,8 +35,8 @@ async function callMLService(scanType, filePath, bloodData) {
 
   const url = `${ML_SERVICE_URL}${endpoint}`;
 
-  // Blood reports send JSON, others send the image file
-  if (scanType === 'Blood Report') {
+  // If numeric JSON bloodData is explicitly provided without a file
+  if (scanType === 'Blood Report' && bloodData && !filePath) {
     const { data } = await axios.post(url, bloodData, {
       headers: { 'Content-Type': 'application/json' },
       timeout: 30000,
@@ -44,7 +44,7 @@ async function callMLService(scanType, filePath, bloodData) {
     return data;
   }
 
-  // Image-based scans — send file as multipart
+  // File uploads (PDF blood report, Brain MRI, Breast mammography, Spleen CT)
   const formData = new FormData();
   formData.append('image', fs.createReadStream(filePath));
 
@@ -70,12 +70,8 @@ const analyzeMRI = async (req, res, next) => {
 
     // Try real ML service
     try {
-      if (scanType === 'Blood Report' && bloodData) {
-        // Blood report: send numeric values
-        analysisResults = await callMLService(scanType, null, bloodData);
-        usedRealModel = true;
-      } else if (file) {
-        // Image-based scan: send uploaded file
+      if (file) {
+        // Any uploaded file (including Blood Report PDF, MRI, CT scans)
         analysisResults = await callMLService(scanType, file.path, null);
         usedRealModel = true;
 
@@ -83,8 +79,24 @@ const analyzeMRI = async (req, res, next) => {
         fs.unlink(file.path, (err) => {
           if (err) console.error('Failed to clean up upload:', err);
         });
+      } else if (scanType === 'Blood Report' && bloodData) {
+        // Blood report: manual numeric values from form
+        const parsedBloodData = typeof bloodData === 'string' ? JSON.parse(bloodData) : bloodData;
+        analysisResults = await callMLService(scanType, null, parsedBloodData);
+        usedRealModel = true;
       }
     } catch (mlError) {
+      // Check if ML service specifically rejected an invalid or non-medical image
+      const mlResponse = mlError.response?.data;
+      if (mlResponse && mlResponse.is_rejected) {
+        if (file && fs.existsSync(file.path)) {
+          fs.unlink(file.path, () => {});
+        }
+        return res.status(422).json({
+          success: false,
+          error: mlResponse.error || 'The uploaded file does not appear to be a valid medical scan.'
+        });
+      }
       console.warn(`ML service unavailable (${mlError.message}), falling back to mock analysis`);
     }
 

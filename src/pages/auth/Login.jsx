@@ -37,7 +37,7 @@ const rolePaths = {
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, loginDemo, isAuthenticated, user } = useAuth();
   const [activeRole, setActiveRole] = useState(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [email, setEmail] = useState('');
@@ -68,18 +68,12 @@ export default function Login() {
   const handleDemoLogin = async (role, path) => {
     setError('');
     setLoading(true);
-    const demoCredentials = {
-      Patient: { email: 'meera@example.com', password: 'password123' },
-      Doctor: { email: 'arvind@example.com', password: 'password123' },
-      Hospital: { email: 'admin@apollohyderabad.com', password: 'password123' },
-      Admin: { email: 'admin@neurocare.com', password: 'password123' },
-    };
-    const creds = demoCredentials[role];
     try {
-      await login(creds.email, creds.password);
-      navigate(path, { replace: true });
+      const loggedUser = await loginDemo(role);
+      const nextPath = path || rolePaths[loggedUser?.role] || '/dashboard';
+      navigate(nextPath, { replace: true });
     } catch (err) {
-      setError(`Demo login failed for ${role}. Run 'npm run seed' to create demo accounts.`);
+      setError(`Demo login failed for ${role}. Please try again.`);
     } finally {
       setLoading(false);
     }

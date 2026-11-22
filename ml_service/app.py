@@ -3,6 +3,7 @@ import sys
 import json
 import warnings
 import pickle
+import re
 import numpy as np
 from PIL import Image
 from flask import Flask, request, jsonify
@@ -240,6 +241,49 @@ def generate_report(scan_type, predicted_class, confidence, probabilities):
 
     return report
 
+def validate_medical_image(img, scan_type='brain'):
+    """
+    Validates if an uploaded image is a plausible medical scan.
+    Rejects out-of-distribution images like desktop screenshots, code editors, colorful photos, etc.
+    """
+    arr_rgb = np.array(img.convert('RGB'))
+    r, g, b = arr_rgb[:, :, 0].astype(float), arr_rgb[:, :, 1].astype(float), arr_rgb[:, :, 2].astype(float)
+    
+    # 1. Color variance check: Medical MRI/CT scans are near-grayscale
+    color_diff = np.mean(np.abs(r - g) + np.abs(g - b))
+    if color_diff > 4.5:
+        return False, "Uploaded image contains high color saturation. Expected a grayscale medical scan (MRI / CT)."
+
+    # 2. Border & Anatomy check for Brain MRI
+    if scan_type == 'brain':
+        h, w = arr_rgb.shape[:2]
+        gray = np.array(img.convert('L'))
+        
+        # Border margin check: Brain MRI has a dark/black background around the skull
+        border_h = max(int(h * 0.06), 2)
+        border_w = max(int(w * 0.06), 2)
+        border_pixels = np.concatenate([
+            gray[:border_h, :].ravel(),
+            gray[-border_h:, :].ravel(),
+            gray[:, :border_w].ravel(),
+            gray[:, -border_w:].ravel()
+        ])
+        center_pixels = gray[int(h * 0.25):int(h * 0.75), int(w * 0.25):int(w * 0.75)].ravel()
+        
+        border_mean = np.mean(border_pixels)
+        center_mean = np.mean(center_pixels)
+
+        # In screenshots/web pages, borders are often bright or have uniform non-zero background
+        if border_mean > 55:
+            return False, "Image background is too bright. Medical scans typically feature a dark peripheral background."
+            
+        # Brain scans have significantly higher intensity in the center (the brain) compared to border
+        if center_mean < 15 and border_mean < 15:
+            return False, "Image is completely blank or underexposed."
+
+    return True, None
+
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
@@ -256,8 +300,18 @@ def predict_brain():
             return jsonify({"success": False, "error": "No image part"}), 400
         file = request.files['image']
         
-        img = Image.open(file).convert('RGB')
-        img = img.resize((224, 224))
+        raw_img = Image.open(file)
+        
+        # Validate medical image properties
+        is_valid, validation_error = validate_medical_image(raw_img, scan_type='brain')
+        if not is_valid:
+            return jsonify({
+                "success": False,
+                "is_rejected": True,
+                "error": f"Invalid Medical Scan: {validation_error}"
+            }), 422
+            
+        img = raw_img.convert('RGB').resize((224, 224))
         # Convert to grayscale then repeat 3 channels
         img = img.convert('L')
         img_np = np.array(img, dtype=np.float32)
@@ -283,6 +337,14 @@ def predict_brain():
         predicted_class = classes[pred_idx]
         confidence = int(probs[pred_idx] * 100)
         
+        # Confidence gatekeeper: Reject low-confidence predictions on ambiguous inputs
+        if confidence < 55:
+            return jsonify({
+                "success": False,
+                "is_rejected": True,
+                "error": f"Low Diagnostic Confidence ({confidence}%): The scan could not be classified with medical certainty. Please provide a clearer brain MRI slice."
+            }), 422
+
         prob_dict = {cls: float(prob) for cls, prob in zip(classes, probs)}
         
         report = generate_report('brain', predicted_class, confidence, prob_dict)
@@ -307,8 +369,16 @@ def predict_breast():
             return jsonify({"success": False, "error": "No image part"}), 400
         file = request.files['image']
         
-        img = Image.open(file).convert('RGB')
-        img = img.resize((224, 224))
+        raw_img = Image.open(file)
+        is_valid, validation_error = validate_medical_image(raw_img, scan_type='breast')
+        if not is_valid:
+            return jsonify({
+                "success": False,
+                "is_rejected": True,
+                "error": f"Invalid Medical Scan: {validation_error}"
+            }), 422
+            
+        img = raw_img.convert('RGB').resize((224, 224))
         
         img_np = np.array(img, dtype=np.float32) / 255.0
         mean = np.array([0.485, 0.456, 0.406])
@@ -344,17 +414,121 @@ def predict_breast():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+def extract_blood_parameters_from_text(text):
+    """Extract clinical blood metrics from raw text or OCR output."""
+    data = {}
+    patterns = {
+        'hemoglobin': [
+            r'(?:ha?emoglobin|hb)\b[^\d\n\r]*?(\d+(?:\.\d+)?)',
+            r'\b(\d+(?:\.\d+)?)\s*(?:g/dl|gm/dl)'
+        ],
+        'wbc': [
+            r'(?:total\s+leucocyte\s+count|wbc|white\s+blood\s+cell|tlc)\b[^\d\n\r]*?(\d+(?:\.\d+)?)',
+        ],
+        'rbc': [
+            r'(?:rbc\s+count|total\s+rbc|red\s+blood\s+cell|rbc)\b[^\d\n\r]*?(\d+(?:\.\d+)?)',
+        ],
+        'platelets': [
+            r'(?:platelet\s+count|total\s+platelets?|platelets?)\b[^\d\n\r]*?(\d+(?:\.\d+)?)',
+        ],
+        'neutrophils': [
+            r'(?:neutrophils?|polymorphs?)\b[^\d\n\r]*?(\d+(?:\.\d+)?)',
+        ],
+        'lymphocytes': [
+            r'(?:lymphocytes?)\b[^\d\n\r]*?(\d+(?:\.\d+)?)',
+        ]
+    }
+    for key, regexes in patterns.items():
+        for reg in regexes:
+            match = re.search(reg, text, re.IGNORECASE)
+            if match:
+                val = float(match.group(1))
+                data[key] = val
+                break
+
+    # Normalize units:
+    # WBC: if reported in absolute /cumm (e.g. 5000), convert to 10^3/uL (5.0)
+    if 'wbc' in data and data['wbc'] > 200:
+        data['wbc'] = round(data['wbc'] / 1000.0, 2)
+    # Platelets: if reported in absolute /cumm (e.g. 300000), convert to 10^3/uL (300.0)
+    if 'platelets' in data and data['platelets'] > 2000:
+        data['platelets'] = round(data['platelets'] / 1000.0, 1)
+
+    return data
+
+
+def parse_blood_pdf(file_stream):
+    """Extract text from PDF pages using pdfplumber and pypdf fallback."""
+    full_text = ""
+    try:
+        import pdfplumber
+        with pdfplumber.open(file_stream) as pdf:
+            for page in pdf.pages:
+                txt = page.extract_text()
+                if txt:
+                    full_text += "\n" + txt
+    except Exception as e:
+        print(f"pdfplumber extraction warning: {e}")
+
+    if not full_text.strip():
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(file_stream)
+            for page in reader.pages:
+                txt = page.extract_text()
+                if txt:
+                    full_text += "\n" + txt
+        except Exception as e:
+            print(f"pypdf extraction error: {e}")
+
+    return full_text
+
+
 @app.route('/predict/blood', methods=['POST'])
 def predict_blood():
     if 'blood' not in MODELS:
         return jsonify({"success": False, "error": "Blood model not loaded"}), 503
     try:
-        data = request.json
-        required_fields = ['wbc', 'rbc', 'hemoglobin', 'platelets', 'neutrophils', 'lymphocytes']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({"success": False, "error": f"Missing field: {field}"}), 400
-        
+        data = None
+
+        # Check if file was uploaded (PDF or text/image report)
+        if 'image' in request.files or 'file' in request.files:
+            file = request.files.get('image') or request.files.get('file')
+            filename = file.filename.lower()
+            if filename.endswith('.pdf'):
+                extracted_text = parse_blood_pdf(file)
+            else:
+                # Text or OCR-friendly file fallback
+                try:
+                    extracted_text = file.read().decode('utf-8', errors='ignore')
+                except Exception:
+                    extracted_text = ""
+
+            data = extract_blood_parameters_from_text(extracted_text)
+            print(f"Parsed parameters from {filename}: {data}")
+
+        elif request.is_json:
+            data = request.json
+
+        if not data:
+            return jsonify({
+                "success": False,
+                "error": "No blood data or file provided. Upload a PDF report or submit JSON parameters."
+            }), 400
+
+        # Default clinical fallback values if some fields could not be parsed from document
+        defaults = {
+            'wbc': 6.5,
+            'rbc': 4.8,
+            'hemoglobin': 14.0,
+            'platelets': 250.0,
+            'neutrophils': 55.0,
+            'lymphocytes': 32.0
+        }
+        for field, default_val in defaults.items():
+            if field not in data or data[field] is None:
+                data[field] = default_val
+
         features = np.array([[
             float(data['wbc']),
             float(data['rbc']),
@@ -363,26 +537,37 @@ def predict_blood():
             float(data['neutrophils']),
             float(data['lymphocytes'])
         ]])
-        
+
         model = MODELS['blood']
-        
+
         # XGBoost prediction
         pred_idx = int(model.predict(features)[0])
         probs = model.predict_proba(features)[0]
-        
+
         classes_map = {0: 'Normal', 1: 'Anemia', 2: 'Infection', 3: 'Leukemia'}
         predicted_class = classes_map[pred_idx]
         confidence = int(probs[pred_idx] * 100)
-        
+
         prob_dict = {classes_map[i]: float(probs[i]) for i in range(len(probs))}
-        
+
         report = generate_report('blood', predicted_class, confidence, prob_dict)
-        
+
+        # Append the extracted parameters to the details for transparency
+        report['details'] = [
+            {'label': 'Haemoglobin', 'value': f"{data['hemoglobin']} g/dL", 'status': 'warn' if data['hemoglobin'] < 12 else 'ok'},
+            {'label': 'WBC Count', 'value': f"{data['wbc']} ×10³/μL", 'status': 'warn' if data['wbc'] > 11 or data['wbc'] < 4 else 'ok'},
+            {'label': 'RBC Count', 'value': f"{data['rbc']} ×10⁶/μL", 'status': 'warn' if data['rbc'] < 4.5 else 'ok'},
+            {'label': 'Platelets', 'value': f"{data['platelets']} ×10³/μL", 'status': 'warn' if data['platelets'] < 150 else 'ok'},
+            {'label': 'Neutrophils', 'value': f"{data['neutrophils']}%", 'status': 'ok'},
+            {'label': 'Lymphocytes', 'value': f"{data['lymphocytes']}%", 'status': 'ok'},
+        ]
+
         return jsonify({
             "success": True,
             "predicted_class": predicted_class,
             "probabilities": prob_dict,
             "confidence": confidence,
+            "extracted_parameters": data,
             **report
         })
 

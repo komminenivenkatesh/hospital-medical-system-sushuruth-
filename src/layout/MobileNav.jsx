@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Box, Paper, Typography, Fab } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,14 +5,13 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-import { tokens } from '../theme/theme';
+import { makeTokens } from '../theme/theme';
+import useStore from '../store/useStore';
 
 const items = [
   { label: 'Home',    iconOff: HomeOutlinedIcon,           iconOn: HomeRoundedIcon,           path: '/dashboard'    },
@@ -26,6 +24,10 @@ const items = [
 export default function MobileNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const themeMode = useStore((s) => s.themeMode);
+  const accentColor = useStore((s) => s.accentColor);
+  const t = makeTokens(themeMode, accentColor);
+  const dark = themeMode === 'dark';
 
   return (
     <Paper
@@ -37,13 +39,13 @@ export default function MobileNav() {
         right: 0,
         zIndex: 1200,
         display: { xs: 'block', md: 'none' },
-        background: 'rgba(255,255,255,0.92)',
+        background: dark ? 'rgba(15, 23, 42, 0.94)' : 'rgba(255, 255, 255, 0.94)',
         backdropFilter: 'blur(24px) saturate(180%)',
         WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        borderTop: '1px solid rgba(229,231,235,0.8)',
+        borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(229,231,235,0.8)'}`,
         borderRadius: '20px 20px 0 0',
-        boxShadow: '0 -4px 24px rgba(0,0,0,0.06)',
-        pb: 'env(safe-area-inset-bottom, 8px)',
+        boxShadow: dark ? '0 -4px 24px rgba(0,0,0,0.4)' : '0 -4px 24px rgba(0,0,0,0.06)',
+        pb: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
       <Box
@@ -72,11 +74,11 @@ export default function MobileNav() {
                     sx={{
                       width: 52,
                       height: 52,
-                      background: `linear-gradient(135deg, ${tokens.primary} 0%, ${tokens.primaryDark} 100%)`,
-                      boxShadow: `0 6px 20px ${tokens.primaryGlow || 'rgba(15,82,186,0.4)'}`,
-                      border: '3px solid #fff',
+                      background: `linear-gradient(135deg, ${t.primary} 0%, ${t.primaryDark} 100%)`,
+                      boxShadow: `0 6px 20px ${t.primaryGlow || 'rgba(15,82,186,0.4)'}`,
+                      border: dark ? '3px solid #1E293B' : '3px solid #fff',
                       '&:hover': {
-                        background: `linear-gradient(135deg, ${tokens.primaryLight || '#1E6FE8'} 0%, ${tokens.primary} 100%)`,
+                        background: `linear-gradient(135deg, ${t.primaryLight || '#1E6FE8'} 0%, ${t.primary} 100%)`,
                       },
                     }}
                   >
@@ -87,7 +89,7 @@ export default function MobileNav() {
             );
           }
 
-          const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+          const isActive = pathname === item.path || (item.path !== '/dashboard' && pathname.startsWith(item.path + '/'));
           const IconOff = item.iconOff;
           const IconOn  = item.iconOn;
 
@@ -110,7 +112,7 @@ export default function MobileNav() {
                 borderRadius: '12px',
                 position: 'relative',
                 transition: 'background 200ms ease',
-                '&:hover': { bgcolor: 'rgba(15,82,186,0.04)' },
+                '&:hover': { bgcolor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,82,186,0.04)' },
               }}
             >
               {/* Active background pill */}
@@ -130,7 +132,7 @@ export default function MobileNav() {
                       width: 36,
                       height: 36,
                       borderRadius: 12,
-                      background: `${tokens.primary}14`,
+                      background: dark ? `${t.primary}25` : `${t.primary}14`,
                     }}
                   />
                 )}
@@ -145,8 +147,8 @@ export default function MobileNav() {
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
                 {isActive
-                  ? <IconOn sx={{ fontSize: 22, color: tokens.primary }} />
-                  : <IconOff sx={{ fontSize: 22, color: '#9CA3AF' }} />
+                  ? <IconOn sx={{ fontSize: 22, color: t.primary }} />
+                  : <IconOff sx={{ fontSize: 22, color: dark ? 'rgba(249,250,251,0.5)' : '#9CA3AF' }} />
                 }
               </motion.div>
 
@@ -155,7 +157,7 @@ export default function MobileNav() {
                 sx={{
                   fontSize: 10,
                   fontWeight: isActive ? 700 : 500,
-                  color: isActive ? tokens.primary : '#9CA3AF',
+                  color: isActive ? t.primary : (dark ? 'rgba(249,250,251,0.5)' : '#9CA3AF'),
                   fontFamily: '"Manrope", sans-serif',
                   lineHeight: 1,
                   transition: 'color 200ms ease, font-weight 200ms ease',

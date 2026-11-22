@@ -1,9 +1,20 @@
+import { useState } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const statements = [
+  'A team of 12,000+ verified specialists, backed by AI — delivering world-class care to every corner of India.',
+  'Real-time DICOM neural scan analysis providing sub-millimeter precision in under 30 seconds.',
+  'Over 450,000 tele-consultations completed with 99.4% patient satisfaction and zero prescription errors.',
+];
 
 export default function ExperienceSection() {
+  const [idx, setIdx] = useState(0);
+
+  const prev = () => setIdx((i) => (i === 0 ? statements.length - 1 : i - 1));
+  const next = () => setIdx((i) => (i === statements.length - 1 ? 0 : i + 1));
   return (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, minHeight: '80vh', bgcolor: '#fff' }}>
       
@@ -52,33 +63,36 @@ export default function ExperienceSection() {
         overflow: 'hidden'
       }}>
         {/* Navigation arrows (top right of this block) */}
-        <Box sx={{ position: 'absolute', top: 40, right: 40, display: 'flex', gap: 2 }}>
-          <IconButton sx={{ border: '1px solid rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
+        <Box sx={{ position: 'absolute', top: 40, right: 40, display: 'flex', gap: 2, zIndex: 2 }}>
+          <IconButton onClick={prev} sx={{ border: '1px solid rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
             <ArrowBackRoundedIcon />
           </IconButton>
-          <IconButton sx={{ border: '1px solid rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
+          <IconButton onClick={next} sx={{ border: '1px solid rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
             <ArrowForwardRoundedIcon />
           </IconButton>
         </Box>
 
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-        >
-          <Typography 
-            sx={{ 
-              fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)', 
-              fontWeight: 600, 
-              lineHeight: 1.25,
-              maxWidth: 600,
-              letterSpacing: '-0.02em'
-            }}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.4 }}
           >
-            A team of 12,000+ verified specialists, backed by AI — delivering world-class care to every corner of India.
-          </Typography>
-        </motion.div>
+            <Typography 
+              sx={{ 
+                fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)', 
+                fontWeight: 600, 
+                lineHeight: 1.25,
+                maxWidth: 600,
+                letterSpacing: '-0.02em'
+              }}
+            >
+              {statements[idx]}
+            </Typography>
+          </motion.div>
+        </AnimatePresence>
       </Box>
 
       {/* 3. Right: Spline Viewer Container */}

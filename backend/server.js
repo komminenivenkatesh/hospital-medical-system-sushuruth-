@@ -32,6 +32,12 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const mriRoutes = require('./routes/mriRoutes');
 const hospitalRoutes = require('./routes/hospitalRoutes');
+const healthRoutes = require('./routes/healthRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const familyRoutes = require('./routes/familyRoutes');
+const articleRoutes = require('./routes/articleRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 // Error handling middleware
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
@@ -50,9 +56,9 @@ const server = http.createServer(app);
 // Security HTTP headers
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration (allow ngrok tunnels, mobile clients, and local origins)
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -63,12 +69,13 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting: 100 requests per 15 minutes per IP for API routes
+// Rate limiting: Relaxed in development so polling & dev actions are never blocked
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  max: process.env.NODE_ENV === 'production' ? 100 : 10000,
+  skip: () => process.env.NODE_ENV !== 'production',
+  standardHeaders: true,
+  legacyHeaders: false,
   message: {
     status: 429,
     message: 'Too many requests from this IP, please try again after 15 minutes.',
@@ -83,6 +90,12 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/mri', mriRoutes);
 app.use('/api/hospitals', hospitalRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/family', familyRoutes);
+app.use('/api/articles', articleRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/', (req, res) => {

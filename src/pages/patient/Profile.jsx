@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Box, Typography, TextField, Grid, Button, List, ListItemButton, ListItemText,
   Chip, Switch, FormControlLabel, Stack, Divider, Avatar, Card, CardContent, ToggleButtonGroup, ToggleButton,
-  Snackbar, Alert,
+  Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
@@ -14,9 +14,11 @@ import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import SettingsBrightnessRoundedIcon from '@mui/icons-material/SettingsBrightnessRounded';
+import { useNavigate } from 'react-router-dom';
 import PageTransition, { SectionReveal } from '../../components/PageTransition';
 import PageHeader from '../../components/PageHeader';
 import useStore from '../../store/useStore';
+import { useAuth } from '../../context/AuthContext';
 import { patient } from '../../data/appointments';
 import { tokens } from '../../theme/theme';
 import { patientPhotos } from '../../data/assets';
@@ -48,8 +50,13 @@ const accentColors = [
 const fieldSx = { '& .MuiOutlinedInput-root': { borderRadius: '100px', bgcolor: tokens.surface } };
 
 export default function Profile() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [section, setSection] = useState(0);
   const [savedSnack, setSavedSnack] = useState(false);
+  const [toastMsg, setToastMsg] = useState('Settings saved successfully!');
+  const [pwdDialog, setPwdDialog] = useState(false);
+  const [twoFaEnabled, setTwoFaEnabled] = useState(false);
   const isPro         = useStore((s) => s.isPro);
   const upgrade       = useStore((s) => s.upgradeToPro);
   const togglePlan    = useStore((s) => s.togglePlan);
@@ -100,9 +107,42 @@ export default function Profile() {
         </CardContent>
       </Card>
 
+      {/* Mobile Horizontal Section Tabs */}
+      <Box sx={{
+        display: { xs: 'flex', md: 'none' },
+        gap: 1,
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        pb: 2,
+        width: '100%',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}>
+        {sections.map(({ label, icon: Icon }, i) => (
+          <Chip
+            key={label}
+            icon={<Icon sx={{ fontSize: '16px !important', color: section === i ? `${tokens.primary} !important` : 'inherit' }} />}
+            label={label}
+            onClick={() => setSection(i)}
+            sx={{
+              fontWeight: section === i ? 700 : 500,
+              fontSize: 13,
+              py: 2.2,
+              px: 0.75,
+              borderRadius: 100,
+              bgcolor: section === i ? tokens.primarySoft : '#fff',
+              color: section === i ? tokens.primary : tokens.textSecondary,
+              border: `1px solid ${section === i ? tokens.primary : tokens.border}`,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          />
+        ))}
+      </Box>
+
       <Grid container spacing={2.5}>
-        {/* Sidebar nav */}
-        <Grid size={{ xs: 12, md: 3 }}>
+        {/* Sidebar nav (Desktop only) */}
+        <Grid size={{ xs: 12, md: 3 }} sx={{ display: { xs: 'none', md: 'block' } }}>
           <Card>
             <CardContent sx={{ p: 1.5 }}>
               <List disablePadding>
@@ -141,8 +181,8 @@ export default function Profile() {
                   <Grid size={12}><TextField fullWidth label="Email" defaultValue="meera.sharma@gmail.com" sx={fieldSx} /></Grid>
                 </Grid>
                 <Box sx={{ display: 'flex', gap: 1.5, mt: 3 }}>
-                  <Button variant="contained" onClick={() => setSavedSnack(true)}>Save Changes</Button>
-                  <Button variant="outlined">Cancel</Button>
+                  <Button variant="contained" onClick={() => { setToastMsg('Profile changes saved successfully!'); setSavedSnack(true); }}>Save Changes</Button>
+                  <Button variant="outlined" onClick={() => navigate('/dashboard')}>Cancel</Button>
                 </Box>
               </CardContent>
             </Card>
@@ -320,13 +360,49 @@ export default function Profile() {
                           <Switch defaultChecked={item.on} />
                         </Box>
                       ))}
-                      <Button variant="contained" sx={{ mt: 1, alignSelf: 'flex-start' }}>Save Privacy Settings</Button>
+                      <Button
+                        variant="contained"
+                        onClick={() => { setToastMsg('Privacy preferences updated.'); setSavedSnack(true); }}
+                        sx={{ mt: 1, alignSelf: 'flex-start', borderRadius: '100px' }}
+                      >
+                        Save Privacy Settings
+                      </Button>
                     </>
                   ) : (
                     <>
-                      <Button variant="outlined" fullWidth>Change Password</Button>
-                      <Button variant="outlined" fullWidth>Enable Two-Factor Authentication</Button>
-                      <Button variant="outlined" fullWidth color="error">Sign out of all devices</Button>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => setPwdDialog(true)}
+                        sx={{ borderRadius: '100px' }}
+                      >
+                        Change Password
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => {
+                          const nextVal = !twoFaEnabled;
+                          setTwoFaEnabled(nextVal);
+                          setToastMsg(nextVal ? 'Two-Factor Authentication (2FA) enabled.' : 'Two-Factor Authentication disabled.');
+                          setSavedSnack(true);
+                        }}
+                        sx={{ borderRadius: '100px' }}
+                      >
+                        {twoFaEnabled ? 'Disable Two-Factor Authentication' : 'Enable Two-Factor Authentication'}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        color="error"
+                        onClick={() => {
+                          logout();
+                          navigate('/login');
+                        }}
+                        sx={{ borderRadius: '100px' }}
+                      >
+                        Sign out of all devices
+                      </Button>
                     </>
                   )}
                 </Stack>
@@ -338,14 +414,45 @@ export default function Profile() {
       </Grid>
       </SectionReveal>
     </PageTransition>
+
+    {/* Change Password Dialog */}
+    <Dialog
+      open={pwdDialog}
+      onClose={() => setPwdDialog(false)}
+      maxWidth="xs"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: '16px' } }}
+    >
+      <DialogTitle sx={{ fontWeight: 800 }}>Change Password</DialogTitle>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+        <TextField fullWidth type="password" label="Current Password" size="small" />
+        <TextField fullWidth type="password" label="New Password" size="small" />
+        <TextField fullWidth type="password" label="Confirm New Password" size="small" />
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2.5 }}>
+        <Button onClick={() => setPwdDialog(false)}>Cancel</Button>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setPwdDialog(false);
+            setToastMsg('Password updated successfully!');
+            setSavedSnack(true);
+          }}
+          sx={{ borderRadius: '100px' }}
+        >
+          Update Password
+        </Button>
+      </DialogActions>
+    </Dialog>
+
     <Snackbar
       open={savedSnack}
-      autoHideDuration={2000}
+      autoHideDuration={3000}
       onClose={() => setSavedSnack(false)}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
-      <Alert severity="success" onClose={() => setSavedSnack(false)} sx={{ fontWeight: 600 }}>
-        Profile updated successfully!
+      <Alert severity="success" sx={{ borderRadius: '12px' }}>
+        {toastMsg}
       </Alert>
     </Snackbar>
     </>

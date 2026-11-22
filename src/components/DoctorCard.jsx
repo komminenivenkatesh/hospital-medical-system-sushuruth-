@@ -153,8 +153,8 @@ export function DoctorGridCard({ doctor }) {
           </Box>
           <Button variant="contained"
             onClick={(e) => { e.stopPropagation(); navigate(`/booking/${doctor.id}`); }}
-            sx={{ px: 2.25, py: 1, borderRadius: 100, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
-            Book Consultation
+            sx={{ px: { xs: 1.75, sm: 2.25 }, py: 0.9, borderRadius: 100, fontSize: { xs: 12, sm: 13 }, fontWeight: 700, flexShrink: 0 }}>
+            Book<Box component="span" sx={{ display: { xs: 'none', sm: 'inline' }, ml: 0.5 }}>Consultation</Box>
           </Button>
         </Box>
       </CardContent>

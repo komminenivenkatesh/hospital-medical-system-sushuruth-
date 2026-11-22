@@ -16,8 +16,9 @@ const Conversation = require('../models/Conversation');
 const initializeSocket = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || '*',
+      origin: '*',
       methods: ['GET', 'POST'],
+      credentials: true,
     },
   });
 
@@ -148,10 +149,164 @@ const initializeSocket = (httpServer) => {
     });
 
     /**
+     * ==========================================
+     * WebRTC Video Consultation Signaling Events
+     * ==========================================
+     */
+
+    /**
+     * video_join_room: Client joins a specific consultation video room
+     */
+    socket.on('video_join_room', ({ roomId, user }) => {
+      try {
+        if (!roomId) return;
+        const roomName = `video:${roomId}`;
+
+        // Find existing sockets in room before joining
+        const existingSocketIds = Array.from(io.sockets.adapter.rooms.get(roomName) || []);
+        const existingPeers = existingSocketIds
+          .map((id) => io.sockets.sockets.get(id))
+          .filter(Boolean)
+          .map((s) => ({ socketId: s.id, user: s.data.videoUser }));
+
+        socket.join(roomName);
+        socket.data.videoRoom = roomId;
+        socket.data.videoUser = user;
+
+        const count = (io.sockets.adapter.rooms.get(roomName) || new Set()).size;
+
+        console.log(`[Video Socket] ${socket.id} (${user?.name || 'User'}) joined room: ${roomName} (Total in room: ${count})`);
+
+        // 1. Notify other participants in the room that a new peer joined
+        socket.to(roomName).emit('user_joined_video', {
+          socketId: socket.id,
+          user: user || { name: 'Participant' },
+          totalParticipants: count,
+        });
+
+        // 2. Acknowledge back to sender with room info AND existing peers
+        socket.emit('video_room_joined', {
+          roomId,
+          totalParticipants: count,
+          isInitiator: count === 1,
+          existingPeers,
+        });
+      } catch (error) {
+        console.error(`[Video Socket] Error on video_join_room:`, error.message);
+      }
+    });
+
+    /**
+     * webrtc_offer: Client sends SDP offer to peers in the consultation room
+     */
+    socket.on('webrtc_offer', ({ roomId, sdp, callerInfo }) => {
+      try {
+        if (!roomId || !sdp) return;
+        console.log(`[Video Socket] webrtc_offer from ${socket.id} (${callerInfo?.name || 'User'}) for room: video:${roomId}`);
+        socket.to(`video:${roomId}`).emit('webrtc_offer', {
+          sdp,
+          callerInfo,
+          senderSocketId: socket.id,
+        });
+      } catch (error) {
+        console.error(`[Video Socket] Error on webrtc_offer:`, error.message);
+      }
+    });
+
+    /**
+     * webrtc_answer: Client answers SDP offer
+     */
+    socket.on('webrtc_answer', ({ roomId, sdp }) => {
+      try {
+        if (!roomId || !sdp) return;
+        console.log(`[Video Socket] webrtc_answer from ${socket.id} for room: video:${roomId}`);
+        socket.to(`video:${roomId}`).emit('webrtc_answer', {
+          sdp,
+          senderSocketId: socket.id,
+        });
+      } catch (error) {
+        console.error(`[Video Socket] Error on webrtc_answer:`, error.message);
+      }
+    });
+
+    /**
+     * webrtc_ice_candidate: Exchange ICE candidates
+     */
+    socket.on('webrtc_ice_candidate', ({ roomId, candidate }) => {
+      try {
+        if (!roomId || !candidate) return;
+        socket.to(`video:${roomId}`).emit('webrtc_ice_candidate', {
+          candidate,
+          senderSocketId: socket.id,
+        });
+      } catch (error) {
+        console.error(`[Video Socket] Error on webrtc_ice_candidate:`, error.message);
+      }
+    });
+
+    /**
+     * media_state_change: Mic or Camera toggle
+     */
+    socket.on('media_state_change', ({ roomId, mic, cam, screen }) => {
+      try {
+        if (!roomId) return;
+        socket.to(`video:${roomId}`).emit('peer_media_state_changed', {
+          senderSocketId: socket.id,
+          mic,
+          cam,
+          screen,
+        });
+      } catch (error) {
+        console.error(`[Video Socket] Error on media_state_change:`, error.message);
+      }
+    });
+
+    /**
+     * video_chat_message: In-call quick text messaging
+     */
+    socket.on('video_chat_message', ({ roomId, sender, senderType, content, timestamp }) => {
+      try {
+        if (!roomId || !content) return;
+        io.to(`video:${roomId}`).emit('video_chat_message', {
+          id: `vmsg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          sender,
+          senderType,
+          content,
+          timestamp: timestamp || new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error(`[Video Socket] Error on video_chat_message:`, error.message);
+      }
+    });
+
+    /**
+     * end_video_call: Either participant ends consultation
+     */
+    socket.on('end_video_call', ({ roomId, reason, prescriptionId }) => {
+      try {
+        if (!roomId) return;
+        io.to(`video:${roomId}`).emit('video_call_ended', {
+          endedBy: socket.id,
+          reason: reason || 'Consultation concluded',
+          prescriptionId: prescriptionId || null,
+        });
+        console.log(`[Video Socket] Consultation in room video:${roomId} ended.`);
+      } catch (error) {
+        console.error(`[Video Socket] Error on end_video_call:`, error.message);
+      }
+    });
+
+    /**
      * Event 6: disconnect
-     * Logs socket disconnection.
+     * Logs socket disconnection and cleans up video room if active.
      */
     socket.on('disconnect', (reason) => {
+      if (socket.data.videoRoom) {
+        socket.to(`video:${socket.data.videoRoom}`).emit('peer_left_video', {
+          socketId: socket.id,
+          user: socket.data.videoUser,
+        });
+      }
       console.log(`Socket disconnected: ${socket.id} (Reason: ${reason})`);
     });
   });
