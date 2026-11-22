@@ -56,8 +56,8 @@ export default function DoctorPatients() {
       <Box sx={{ 
         bgcolor: '#5476FF', // The blue background from the image
         minHeight: '100vh',
-        p: { xs: 2, md: 4 },
-        m: { xs: -2, md: -4 }, // Negate layout padding if needed
+        p: { xs: 1.5, sm: 2, md: 4 },
+        m: { xs: -1.5, sm: -2, md: -4 }, // Negate layout padding if needed
         borderRadius: 4
       }}>
         
@@ -65,19 +65,19 @@ export default function DoctorPatients() {
         <Box sx={{ 
           bgcolor: '#fff', 
           borderRadius: 4, 
-          p: { xs: 3, md: 4 },
+          p: { xs: 2, sm: 3, md: 4 },
           minHeight: '80vh',
           boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
         }}>
           
           {/* Header Row */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <GroupRoundedIcon sx={{ fontSize: 28, color: '#1E293B' }} />
               <Typography sx={{ fontWeight: 800, fontSize: 24, color: '#1E293B' }}>Patients</Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
               <IconButton onClick={() => document.getElementById('patient-search-input')?.focus()} sx={{ border: '1px solid #E2E8F0', p: 1 }}>
                 <SearchRoundedIcon sx={{ color: '#64748B' }} />
               </IconButton>
@@ -86,7 +86,7 @@ export default function DoctorPatients() {
               </IconButton>
               <Box onClick={() => navigate('/doctor/profile')} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, border: '1px solid #E2E8F0', borderRadius: 100, py: 0.5, px: 0.5, pr: 2, cursor: 'pointer', '&:hover': { bgcolor: '#F8FAFC' } }}>
                 <Avatar src="https://i.pravatar.cc/150?img=5" sx={{ width: 36, height: 36 }} />
-                <Box>
+                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1E293B', lineHeight: 1.2 }}>Dr. Jane Amine</Typography>
                   <Typography sx={{ fontSize: 11, color: '#64748B' }}>Neurologist</Typography>
                 </Box>
@@ -100,8 +100,9 @@ export default function DoctorPatients() {
               {filteredPatients.length} Patients Total
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' } }}>
               <InputBase
+                id="patient-search-input"
                 placeholder="Search patient or diagnosis..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -112,7 +113,8 @@ export default function DoctorPatients() {
                   py: 0.5,
                   fontSize: 13,
                   border: '1px solid #E2E8F0',
-                  minWidth: 220,
+                  flex: { xs: 1, sm: 'none' },
+                  minWidth: { xs: '140px', sm: 220 },
                 }}
               />
               <Select 
@@ -139,11 +141,12 @@ export default function DoctorPatients() {
                   bgcolor: '#4338CA', 
                   color: '#fff', 
                   borderRadius: 100, 
-                  px: 3, 
+                  px: { xs: 2, sm: 3 }, 
                   py: 1, 
                   textTransform: 'none', 
                   fontWeight: 600,
                   boxShadow: 'none',
+                  width: { xs: '100%', sm: 'auto' },
                   '&:hover': { bgcolor: '#3730A3', boxShadow: 'none' }
                 }}
               >
@@ -153,8 +156,8 @@ export default function DoctorPatients() {
           </Box>
 
           {/* Table Container */}
-          <Box sx={{ border: '1px solid #F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-            <Table>
+          <Box sx={{ border: '1px solid #F1F5F9', borderRadius: 3, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <Table sx={{ minWidth: 650 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#fff' }}>
                   <TableCell sx={{ fontWeight: 700, color: '#1E293B', fontSize: 14, borderBottom: '1px solid #F1F5F9', py: 2.5 }}>Name</TableCell>
@@ -206,9 +209,9 @@ export default function DoctorPatients() {
                           size="small"
                           startIcon={<VideocamRoundedIcon sx={{ fontSize: 16 }} />}
                           onClick={() => {
-                            const targetRoom = (row.name?.includes('Meera') || row.id === 'p1') ? 'a001' : `room_${row.id}`;
+                            const targetRoom = (p.name?.includes('Meera') || p.id === 'p1') ? 'a001' : `room_${p.id || p._id || index}`;
                             navigate(`/doctor/consult/${targetRoom}`, {
-                              state: { patientName: row.name, patientId: row.id },
+                              state: { patientName: p.name, patientId: p.id || p._id },
                             });
                           }}
                           sx={{

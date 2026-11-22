@@ -149,13 +149,13 @@ export default function DoctorDashboard() {
         {stats.map((s) => (
           <Grid size={{ xs: 6, md: 3 }} key={s.label}>
             <Card sx={{ bgcolor: s.bg, border: `1px solid ${s.color}22` }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Box sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: '#fff', display: 'flex',
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Box sx={{ width: { xs: 32, sm: 38 }, height: { xs: 32, sm: 38 }, borderRadius: 2, bgcolor: '#fff', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', mb: 1.5 }}>
-                  <s.icon sx={{ fontSize: 20, color: s.color }} />
+                  <s.icon sx={{ fontSize: { xs: 18, sm: 20 }, color: s.color }} />
                 </Box>
-                <Typography sx={{ fontWeight: 800, fontSize: 26, color: s.color, lineHeight: 1.1 }}>{s.value}</Typography>
-                <Typography sx={{ fontSize: 12, fontWeight: 600, color: s.color, opacity: 0.85 }}>{s.label}</Typography>
+                <Typography sx={{ fontWeight: 800, fontSize: { xs: 20, sm: 26 }, color: s.color, lineHeight: 1.1 }} noWrap>{s.value}</Typography>
+                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, fontWeight: 600, color: s.color, opacity: 0.85 }} noWrap>{s.label}</Typography>
               </CardContent>
             </Card>
           </Grid>

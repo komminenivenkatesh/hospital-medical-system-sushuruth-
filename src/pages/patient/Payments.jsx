@@ -212,11 +212,12 @@ export default function Payments() {
                   <Box
                     sx={{
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: { xs: 'flex-start', sm: 'center' },
                       justifyContent: 'space-between',
+                      flexDirection: { xs: 'column', sm: 'row' },
                       px: 2.5,
                       py: 2,
-                      gap: 2,
+                      gap: { xs: 1.5, sm: 2 },
                       '&:hover': { bgcolor: tokens.surfaceMuted },
                       transition: 'background-color 150ms ease',
                     }}
@@ -231,6 +232,7 @@ export default function Payments() {
                           fontWeight: 700,
                           fontSize: 14,
                           borderRadius: 2.5,
+                          flexShrink: 0,
                         }}
                       >
                         {initials}
@@ -243,7 +245,7 @@ export default function Payments() {
                       </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' }, gap: 2, pl: { xs: 7, sm: 0 } }}>
                       <Chip
                         label={t.status}
                         size="small"

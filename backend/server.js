@@ -56,9 +56,24 @@ const server = http.createServer(app);
 // Security HTTP headers
 app.use(helmet());
 
-// CORS configuration (allow ngrok tunnels, mobile clients, and local origins)
+// CORS configuration (allow production frontend, ngrok tunnels, mobile clients, and local origins)
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5175',
+  'http://localhost:5173',
+].filter(Boolean);
+
 const corsOptions = {
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+      callback(null, true);
+    } else if (process.env.NODE_ENV !== 'production') {
+      callback(null, true); // Allow all in development
+    } else {
+      callback(null, true); // For now allow all — tighten later
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

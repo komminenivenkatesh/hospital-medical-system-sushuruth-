@@ -123,31 +123,33 @@ export default function Earnings() {
               <CircularProgress size={30} />
             </Box>
           ) : (
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: '#F9FAFB' }}>
-                  {['Date', 'Patient', 'Type', 'Gross', 'Commission', 'Net'].map((h) => (
-                    <TableCell key={h} sx={{ fontWeight: 700, color: '#6B7280', fontSize: 12 }}>
-                      {h}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {txns.map((t, i) => (
-                  <TableRow key={t.id || i} hover>
-                    <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{t.date}</TableCell>
-                    <TableCell sx={{ fontSize: 13 }}>{t.patient}</TableCell>
-                    <TableCell sx={{ fontSize: 13 }}>{t.type}</TableCell>
-                    <TableCell sx={{ fontSize: 13, fontWeight: 700 }}>₹{Number(t.gross).toLocaleString('en-IN')}</TableCell>
-                    <TableCell sx={{ fontSize: 13, color: '#EF4444' }}>-₹{Number(t.commission).toLocaleString('en-IN')}</TableCell>
-                    <TableCell sx={{ fontSize: 13, fontWeight: 700, color: '#10B981' }}>
-                      ₹{Number(t.net).toLocaleString('en-IN')}
-                    </TableCell>
+            <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <Table sx={{ minWidth: 540 }}>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#F9FAFB' }}>
+                    {['Date', 'Patient', 'Type', 'Gross', 'Commission', 'Net'].map((h) => (
+                      <TableCell key={h} sx={{ fontWeight: 700, color: '#6B7280', fontSize: 12 }}>
+                        {h}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {txns.map((t, i) => (
+                    <TableRow key={t.id || i} hover>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{t.date}</TableCell>
+                      <TableCell sx={{ fontSize: 13 }}>{t.patient}</TableCell>
+                      <TableCell sx={{ fontSize: 13 }}>{t.type}</TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 700 }}>₹{Number(t.gross).toLocaleString('en-IN')}</TableCell>
+                      <TableCell sx={{ fontSize: 13, color: '#EF4444' }}>-₹{Number(t.commission).toLocaleString('en-IN')}</TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 700, color: '#10B981' }}>
+                        ₹{Number(t.net).toLocaleString('en-IN')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           )}
         </CardContent>
       </Card>

@@ -26,6 +26,12 @@ env/
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Environment files (keep .env.example, ignore secrets)
+backend/.env
+backend/.env.production
+.env.local
+.env.*.local
+
 # Claude / Assistant
 .claude/
 

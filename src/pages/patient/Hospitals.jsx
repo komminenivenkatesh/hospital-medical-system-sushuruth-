@@ -153,6 +153,7 @@ export default function Hospitals() {
                 <Button 
                   onClick={(e) => { e.stopPropagation(); navigate('/hospitals/1'); }}
                   variant="contained" 
+                  fullWidth
                   sx={{ bgcolor: tokens.primary, color: '#fff', textTransform: 'none', borderRadius: 6, fontWeight: 600, py: 1.2, '&:hover': { bgcolor: tokens.primaryDark }, mb: 'auto' }}>
                   Select
                 </Button>

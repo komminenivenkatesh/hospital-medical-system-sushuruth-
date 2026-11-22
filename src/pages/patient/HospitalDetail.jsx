@@ -82,7 +82,7 @@ export default function HospitalDetail() {
               </Box>
             </Box>
 
-            <Typography variant="h3" sx={{ fontWeight: 800, color: tokens.textPrimary, mb: 1, fontFamily: 'Georgia, serif' }}>
+            <Typography sx={{ fontWeight: 800, color: tokens.textPrimary, mb: 1, fontFamily: 'Georgia, serif', fontSize: { xs: 26, sm: 34, md: 44 } }}>
               {h.name}
             </Typography>
             
@@ -125,9 +125,9 @@ export default function HospitalDetail() {
             <Grid container spacing={3}>
               {hospitalDoctors.map(doc => (
                 <Grid size={{ xs: 12, sm: 6 }} key={doc.id}>
-                  <Card sx={{ p: 2, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: `1px solid ${tokens.border}` }}>
+                  <Card sx={{ p: 2, borderRadius: 4, display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: `1px solid ${tokens.border}` }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar src={doc.image} sx={{ width: 56, height: 56 }} />
+                      <Avatar src={doc.image} sx={{ width: 52, height: 52 }} />
                       <Box>
                         <Typography sx={{ fontWeight: 700, fontSize: 15 }}>{doc.name}</Typography>
                         <Typography sx={{ fontSize: 13, color: tokens.primary, fontWeight: 600 }}>{doc.specialty}</Typography>
@@ -138,7 +138,7 @@ export default function HospitalDetail() {
                       onClick={() => window.open(`/doctors/${doc.id}`, '_blank')}
                       variant="outlined" 
                       size="small" 
-                      sx={{ borderRadius: 6, textTransform: 'none', fontWeight: 600, borderColor: tokens.border, color: tokens.textPrimary }}
+                      sx={{ borderRadius: 6, textTransform: 'none', fontWeight: 600, borderColor: tokens.border, color: tokens.textPrimary, width: { xs: '100%', sm: 'auto' } }}
                     >
                       View Profile
                     </Button>

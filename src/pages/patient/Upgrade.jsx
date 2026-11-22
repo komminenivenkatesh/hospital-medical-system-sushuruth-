@@ -351,28 +351,30 @@ export default function Upgrade() {
         <Typography sx={{ fontWeight: 800, fontSize: 22, textAlign: 'center', mb: 3, letterSpacing: '-0.02em' }}>
           Full feature comparison
         </Typography>
-        <Box sx={{ borderRadius: '16px', border: `1px solid ${tokens.border}`, overflow: 'hidden', bgcolor: tokens.surface }}>
-          {/* Header */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 100px', bgcolor: tokens.surfaceMuted, px: 3, py: 1.5 }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 700, color: tokens.textTertiary, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Feature</Typography>
-            {['Free', 'Pro', 'Ultimate'].map((n) => (
-              <Typography key={n} sx={{ fontSize: 12, fontWeight: 700, color: tokens.textSecondary, textAlign: 'center' }}>{n}</Typography>
+        <Box sx={{ borderRadius: '16px', border: `1px solid ${tokens.border}`, overflowX: 'auto', WebkitOverflowScrolling: 'touch', bgcolor: tokens.surface }}>
+          <Box sx={{ minWidth: 480 }}>
+            {/* Header */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 90px 90px 90px', bgcolor: tokens.surfaceMuted, px: { xs: 2, sm: 3 }, py: 1.5 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: tokens.textTertiary, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Feature</Typography>
+              {['Free', 'Pro', 'Ultimate'].map((n) => (
+                <Typography key={n} sx={{ fontSize: 12, fontWeight: 700, color: tokens.textSecondary, textAlign: 'center' }}>{n}</Typography>
+              ))}
+            </Box>
+            {featureRows.map((row, i) => (
+              <Box key={row.label}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 90px 90px 90px', px: { xs: 2, sm: 3 }, py: 1.75, alignItems: 'center',
+                  '&:hover': { bgcolor: tokens.surfaceMuted }, transition: 'background 150ms' }}>
+                  <Typography sx={{ fontSize: 14, color: tokens.textPrimary }}>{row.label}</Typography>
+                  {[row.free, row.pro, row.ult].map((val, j) => (
+                    <Box key={j} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <FeatureCell val={val} />
+                    </Box>
+                  ))}
+                </Box>
+                {i < featureRows.length - 1 && <Divider />}
+              </Box>
             ))}
           </Box>
-          {featureRows.map((row, i) => (
-            <Box key={row.label}>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 100px', px: 3, py: 1.75, alignItems: 'center',
-                '&:hover': { bgcolor: tokens.surfaceMuted }, transition: 'background 150ms' }}>
-                <Typography sx={{ fontSize: 14, color: tokens.textPrimary }}>{row.label}</Typography>
-                {[row.free, row.pro, row.ult].map((val, j) => (
-                  <Box key={j} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <FeatureCell val={val} />
-                  </Box>
-                ))}
-              </Box>
-              {i < featureRows.length - 1 && <Divider />}
-            </Box>
-          ))}
         </Box>
       </Box>
 

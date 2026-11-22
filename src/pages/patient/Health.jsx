@@ -194,7 +194,7 @@ NABH & HIPAA Compliant Healthcare Document
             variant="contained"
             startIcon={<CloudUploadOutlinedIcon />}
             onClick={() => setUploadOpen(true)}
-            sx={{ px: 3, fontWeight: 700, borderRadius: 100, display: { xs: 'none', sm: 'flex' } }}
+            sx={{ px: { xs: 2, sm: 3 }, fontWeight: 700, borderRadius: 100, width: { xs: '100%', sm: 'auto' } }}
           >
             Upload Report
           </Button>
@@ -283,8 +283,8 @@ NABH & HIPAA Compliant Healthcare Document
                         Prescribed Medications ({p.medications?.length || 0})
                       </Typography>
 
-                      <Box sx={{ overflowX: 'auto' }}>
-                        <Table size="small">
+                      <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+                        <Table size="small" sx={{ minWidth: 500 }}>
                           <TableHead>
                             <TableRow sx={{ bgcolor: tokens.surfaceMuted }}>
                               <TableCell sx={{ fontWeight: 700, fontSize: 12 }}>Medicine</TableCell>

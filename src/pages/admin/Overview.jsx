@@ -91,12 +91,12 @@ export default function AdminOverview() {
           return (
             <Grid size={{ xs: 6, md: 4 }} key={m.label}>
               <Card sx={{ bgcolor: m.bg, border: `1px solid ${m.color}22`, borderRadius: 3 }}>
-                <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 }, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } }, display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
                   <Box
                     sx={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 2.5,
+                      width: { xs: 34, sm: 44 },
+                      height: { xs: 34, sm: 44 },
+                      borderRadius: 2,
                       bgcolor: '#fff',
                       display: 'flex',
                       alignItems: 'center',
@@ -104,13 +104,13 @@ export default function AdminOverview() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon sx={{ fontSize: 22, color: m.color }} />
+                    <Icon sx={{ fontSize: { xs: 18, sm: 22 }, color: m.color }} />
                   </Box>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ fontWeight: 800, fontSize: 24, color: m.color, lineHeight: 1.1 }}>
+                    <Typography sx={{ fontWeight: 800, fontSize: { xs: 18, sm: 24 }, color: m.color, lineHeight: 1.1 }} noWrap>
                       {m.value}
                     </Typography>
-                    <Typography sx={{ fontSize: 12, fontWeight: 600, color: m.color, opacity: 0.85 }}>
+                    <Typography sx={{ fontSize: { xs: 10.5, sm: 12 }, fontWeight: 600, color: m.color, opacity: 0.85 }} noWrap>
                       {m.label}
                     </Typography>
                   </Box>

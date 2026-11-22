@@ -83,69 +83,81 @@ export default function Article() {
         </Box>
 
         {/* HERO SECTION */}
-        <Box sx={{ position: 'relative', width: '100%', height: { xs: 350, md: 520 }, bgcolor: '#1E293B' }}>
+        <Box sx={{ position: 'relative', width: '100%', height: { xs: 260, sm: 350, md: 520 }, bgcolor: '#1E293B' }}>
           <SmartImage src={content.img || scenes.lab} alt="hero" sx={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
           {/* Blue/Purple accent block overlapping */}
           <Box
             sx={{
               position: 'absolute',
-              bottom: -30,
+              bottom: { xs: -20, md: -30 },
               left: 0,
-              width: { xs: '70%', md: '35%' },
-              height: 100,
+              width: { xs: '85%', sm: '70%', md: '35%' },
+              height: { xs: 60, md: 100 },
               bgcolor: '#2563EB',
               display: 'flex',
               alignItems: 'center',
-              px: 4,
+              px: { xs: 2.5, md: 4 },
               boxShadow: '0 10px 30px rgba(37,99,235,0.3)',
             }}
           >
-            <Typography sx={{ color: '#fff', fontSize: 13, letterSpacing: 2, fontWeight: 800 }}>
+            <Typography sx={{ color: '#fff', fontSize: { xs: 11, md: 13 }, letterSpacing: 2, fontWeight: 800 }}>
               SUSHRUTH CLINICAL RESEARCH
             </Typography>
           </Box>
         </Box>
 
         {/* MAIN CONTENT AREA */}
-        <Box sx={{ maxWidth: 1000, mx: 'auto', px: 4, pt: 10, pb: 8 }}>
+        <Box sx={{ maxWidth: 1000, mx: 'auto', px: { xs: 2, sm: 3, md: 4 }, pt: { xs: 6, md: 10 }, pb: 8 }}>
           {loading ? (
             <Box sx={{ py: 8, textAlign: 'center' }}>
               <CircularProgress size={36} />
             </Box>
           ) : (
-            <Grid container spacing={6}>
-              {/* Sidebar (Author) */}
-              <Grid size={{ xs: 12, md: 3 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', position: 'sticky', top: 100 }}>
-                  <Avatar src={content.author.avatar} sx={{ width: 80, height: 80, mb: 2, borderRadius: 3, bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 800, fontSize: 24 }}>
-                    {content.author.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
-                  </Avatar>
-                  <Typography sx={{ fontWeight: 800, fontSize: 14, letterSpacing: 0.5, mb: 0.5 }}>
-                    {content.author.name}
-                  </Typography>
-                  <Typography sx={{ fontSize: 12, color: '#666', lineHeight: 1.5, maxWidth: 180 }}>
-                    {content.author.role}
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Content Column */}
-              <Grid size={{ xs: 12, md: 9 }}>
-                <Typography sx={{ fontWeight: 900, fontSize: { xs: 28, md: 40 }, lineHeight: 1.2, color: '#111827', mb: 2 }}>
+            <Grid container spacing={{ xs: 3, md: 6 }}>
+              {/* Content Column first on mobile */}
+              <Grid size={{ xs: 12, md: 9 }} sx={{ order: { xs: 1, md: 2 } }}>
+                <Typography sx={{ fontWeight: 900, fontSize: { xs: 24, sm: 32, md: 40 }, lineHeight: 1.2, color: '#111827', mb: 2 }}>
                   {content.title}
                 </Typography>
-                <Typography sx={{ fontSize: 13, color: '#9CA3AF', mb: 5, fontWeight: 600 }}>
+                <Typography sx={{ fontSize: 13, color: '#9CA3AF', mb: 4, fontWeight: 600 }}>
                   Published on {content.date} · Peer Reviewed
                 </Typography>
 
                 {/* Paragraph with Drop Cap */}
-                <Box sx={{ position: 'relative', mb: 6 }}>
-                  <Typography component="span" sx={{ float: 'left', fontSize: 72, lineHeight: 0.8, fontWeight: 900, color: '#2563EB', mr: 2, mt: 1 }}>
+                <Box sx={{ position: 'relative', mb: 4 }}>
+                  <Typography component="span" sx={{ float: 'left', fontSize: { xs: 54, md: 72 }, lineHeight: 0.8, fontWeight: 900, color: '#2563EB', mr: 2, mt: 1 }}>
                     {content.paragraph1.charAt(0) || 'Q'}
                   </Typography>
-                  <Typography sx={{ fontSize: 16, lineHeight: 1.85, color: '#374151' }}>
+                  <Typography sx={{ fontSize: { xs: 15, md: 16 }, lineHeight: 1.85, color: '#374151' }}>
                     {content.paragraph1.slice(1)}
                   </Typography>
+                </Box>
+              </Grid>
+
+              {/* Sidebar (Author) */}
+              <Grid size={{ xs: 12, md: 3 }} sx={{ order: { xs: 2, md: 1 } }}>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'row', md: 'column' },
+                  alignItems: { xs: 'center', md: 'flex-start' },
+                  gap: { xs: 2, md: 0 },
+                  p: { xs: 2, md: 0 },
+                  bgcolor: { xs: '#F9FAFB', md: 'transparent' },
+                  borderRadius: 3,
+                  position: { xs: 'static', md: 'sticky' },
+                  top: 100,
+                }}>
+                  <Avatar src={content.author.avatar} sx={{ width: { xs: 52, md: 80 }, height: { xs: 52, md: 80 }, mb: { xs: 0, md: 2 }, borderRadius: 3, bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 800, fontSize: 24 }}>
+                    {content.author.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
+                  </Avatar>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, fontSize: 14, letterSpacing: 0.5, mb: 0.5 }}>
+                      {content.author.name}
+                    </Typography>
+                    <Typography sx={{ fontSize: 12, color: '#666', lineHeight: 1.5, maxWidth: 180 }}>
+                      {content.author.role}
+                    </Typography>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>

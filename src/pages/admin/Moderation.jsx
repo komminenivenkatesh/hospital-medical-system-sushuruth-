@@ -77,36 +77,22 @@ export default function Moderation() {
                 <ListItem
                   key={r.id}
                   divider={i < reportsList.length - 1}
-                  secondaryAction={
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => handleDismiss(r.id, r.target)}
-                        sx={{ borderRadius: '100px' }}
-                      >
-                        Dismiss
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="error"
-                        onClick={() => handleRemove(r.id, r.target)}
-                        sx={{ borderRadius: '100px' }}
-                      >
-                        Remove
-                      </Button>
-                    </Stack>
-                  }
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'flex-start', sm: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 1.5,
+                    py: 2,
+                    px: { xs: 1, sm: 2 },
+                  }}
                 >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: '#FFF1F2', color: '#EF4444' }}>
-                      <FlagOutlinedIcon />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, minWidth: 0 }}>
+                    <Avatar sx={{ bgcolor: '#FFF1F2', color: '#EF4444', width: 40, height: 40, flexShrink: 0 }}>
+                      <FlagOutlinedIcon fontSize="small" />
                     </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                         <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{r.target}</Typography>
                         <Chip
                           label={r.severity}
@@ -115,13 +101,35 @@ export default function Moderation() {
                             bgcolor: sevColor[r.severity][0],
                             color: sevColor[r.severity][1],
                             fontWeight: 700,
+                            height: 22,
+                            fontSize: 10,
                           }}
                         />
                       </Box>
-                    }
-                    secondary={`${r.reason} · reported by ${r.reporter}`}
-                    slotProps={{ secondary: { fontSize: 12 } }}
-                  />
+                      <Typography sx={{ fontSize: 12, color: '#6B7280', mt: 0.25 }}>
+                        {r.reason} · reported by {r.reporter}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Stack direction="row" spacing={1} sx={{ width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'flex-end', sm: 'flex-end' }, pl: { xs: 7, sm: 0 } }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => handleDismiss(r.id, r.target)}
+                      sx={{ borderRadius: '100px' }}
+                    >
+                      Dismiss
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleRemove(r.id, r.target)}
+                      sx={{ borderRadius: '100px' }}
+                    >
+                      Remove
+                    </Button>
+                  </Stack>
                 </ListItem>
               ))}
             </List>

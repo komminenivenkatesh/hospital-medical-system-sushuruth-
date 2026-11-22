@@ -859,7 +859,7 @@ export default function MriLab() {
 
                 {/* Body with hotspots */}
                 <Box sx={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  minHeight: 480, background: 'radial-gradient(ellipse at center, #1a2744 0%, #0B1220 70%)', overflow: 'hidden' }}>
+                  minHeight: { xs: 360, sm: 480 }, background: 'radial-gradient(ellipse at center, #1a2744 0%, #0B1220 70%)', overflow: 'hidden' }}>
                   {/* Anatomical silhouette */}
                   <Box sx={{ width: 180, height: 420, position: 'relative', transform: `scale(${zoomLevel})`, transition: 'transform 0.2s ease-out' }}>
                     <svg viewBox="0 0 180 420" width="180" height="420" fill="none">
@@ -911,11 +911,24 @@ export default function MriLab() {
                   </Box>
 
                   {/* Floating scan type badges */}
-                  <Box sx={{ position: 'absolute', bottom: 16, left: 16, right: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  <Box sx={{
+                    position: 'absolute',
+                    bottom: { xs: 8, sm: 16 },
+                    left: { xs: 8, sm: 16 },
+                    right: { xs: 8, sm: 16 },
+                    display: 'flex',
+                    gap: 1,
+                    overflowX: 'auto',
+                    flexWrap: { xs: 'nowrap', sm: 'wrap' },
+                    py: 0.5,
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                  }}>
                     {scanTypes.map((s) => (
                       <Chip key={s.label} label={s.label} size="small"
                         sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontWeight: 600,
-                          fontSize: 10, borderRadius: 1, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}
+                          fontSize: 10, borderRadius: 1, flexShrink: 0, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}
                         clickable />
                     ))}
                   </Box>

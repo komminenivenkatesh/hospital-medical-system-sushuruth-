@@ -70,9 +70,9 @@ export default function Articles() {
 
   return (
     <PageTransition>
-      <Box sx={{ p: { xs: 2, md: 4 }, pb: 8 }}>
+      <Box sx={{ p: { xs: 0, md: 2 }, pb: 8 }}>
         <Box sx={{ mb: 4 }}>
-          <Typography sx={{ fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em', mb: 1 }}>
+          <Typography sx={{ fontWeight: 800, fontSize: { xs: 24, md: 28 }, letterSpacing: '-0.02em', mb: 1 }}>
             Health & Wellness Articles
           </Typography>
           <Typography sx={{ fontSize: 14, color: '#6B7280' }}>
@@ -93,7 +93,7 @@ export default function Articles() {
           }}
           onClick={() => navigate(heroArticle.id ? `/article/${heroArticle.id}` : '/article/1')}
         >
-          <Box sx={{ height: { xs: 300, md: 450 }, width: '100%', position: 'relative' }}>
+          <Box sx={{ height: { xs: 320, sm: 380, md: 450 }, width: '100%', position: 'relative' }}>
             <SmartImage
               src={heroArticle.img}
               alt="Hero"
@@ -103,11 +103,11 @@ export default function Articles() {
               sx={{
                 position: 'absolute',
                 inset: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
               }}
             />
-            <Box sx={{ position: 'absolute', bottom: { xs: 20, md: 40 }, left: { xs: 20, md: 40 }, right: { xs: 20, md: 40 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+            <Box sx={{ position: 'absolute', bottom: { xs: 16, sm: 24, md: 40 }, left: { xs: 16, sm: 24, md: 40 }, right: { xs: 16, sm: 24, md: 40 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 <Chip label={heroArticle.tag} sx={{ bgcolor: tokens.primary, color: '#fff', fontWeight: 700, fontSize: 11, height: 24 }} />
                 <Typography sx={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: 600 }}>{heroArticle.date}</Typography>
               </Box>
@@ -115,16 +115,27 @@ export default function Articles() {
                 sx={{
                   color: '#fff',
                   fontWeight: 800,
-                  fontSize: { xs: 24, md: 36 },
-                  lineHeight: 1.2,
-                  mb: 1.5,
+                  fontSize: { xs: 18, sm: 24, md: 36 },
+                  lineHeight: 1.25,
+                  mb: 1,
                   maxWidth: 800,
-                  textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.3)',
                 }}
               >
                 {heroArticle.title}
               </Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: { xs: 13, md: 15 }, lineHeight: 1.5, maxWidth: 700 }}>
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.85)',
+                  fontSize: { xs: 12, sm: 13, md: 15 },
+                  lineHeight: 1.5,
+                  maxWidth: 700,
+                  display: { xs: '-webkit-box', sm: 'block' },
+                  WebkitLineClamp: { xs: 2, sm: 'none' },
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
                 {heroArticle.desc}
               </Typography>
             </Box>

@@ -13,8 +13,8 @@ export default function PageHeader({ title, subtitle, right, breadcrumbs }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-        <Box>
+      <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'flex-start' }, justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: { xs: 2.5, md: 4 } }}>
+        <Box sx={{ flex: 1, minWidth: 200 }}>
           {/* Breadcrumbs */}
           {breadcrumbs && breadcrumbs.length > 0 && (
             <Breadcrumbs
@@ -52,7 +52,7 @@ export default function PageHeader({ title, subtitle, right, breadcrumbs }) {
           )}
         </Box>
         {right && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
             {right}
           </Box>
         )}

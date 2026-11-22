@@ -9,7 +9,10 @@ let socket = null;
 export const connectSocket = () => {
   if (socket?.connected) return socket;
 
-  socket = io('/', {
+  // In production, connect to the backend URL directly; in dev, Vite proxy handles it
+  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '/';
+
+  socket = io(SOCKET_URL, {
     transports: ['polling', 'websocket'],
     autoConnect: true,
   });

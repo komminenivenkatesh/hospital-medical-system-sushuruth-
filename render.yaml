@@ -1,0 +1,71 @@
+##############################################
+# Render Blueprint - Sushuruth Healthcare App
+# Deploy all 3 services from a single repo
+##############################################
+
+services:
+  # ==========================================
+  # 1. Backend API (Node.js + Express + Socket.IO)
+  # ==========================================
+  - type: web
+    name: sushuruth-backend
+    runtime: node
+    region: singapore  # closest to India
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false  # You'll set this manually from MongoDB Atlas
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: ML_SERVICE_URL
+        fromService:
+          name: sushuruth-ml
+          type: web
+          property: hostport
+      - key: CLIENT_URL
+        sync: false  # Set to your frontend URL after deploy
+
+  # ==========================================
+  # 2. ML Service (Python Flask + AI Models)
+  # ==========================================
+  - type: web
+    name: sushuruth-ml
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: ml_service
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.12"
+      - key: PORT
+        value: 5001
+
+  # ==========================================
+  # 3. Frontend (React + Vite Static Site)
+  # ==========================================
+  - type: web
+    name: sushuruth-frontend
+    runtime: static
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

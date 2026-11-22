@@ -123,7 +123,7 @@ function DashboardHero({ patient, navigate }) {
           </Grid>
 
           {/* Health Score Ring */}
-          <Grid size={{ xs: 12, md: 5 }} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, alignItems: 'center' }}>
+          <Grid size={{ xs: 12, md: 5 }} sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center' }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -168,7 +168,7 @@ function DashboardHero({ patient, navigate }) {
         </Grid>
 
         {/* Quick Action Pills */}
-        <Box sx={{ display: 'flex', gap: 1.5, mt: 3, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, auto)' }, gap: 1.5, mt: 3, position: 'relative', zIndex: 1 }}>
           {quickActions.map((a, i) => (
             <motion.div
               key={a.label}
@@ -177,15 +177,16 @@ function DashboardHero({ patient, navigate }) {
               transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
+              style={{ width: '100%' }}
             >
               <Box
                 onClick={() => navigate(a.path)}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
                   bgcolor: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(255,255,255,0.15)',
                   borderRadius: '10px',
-                  px: 2, py: 1,
+                  px: { xs: 1.5, sm: 2 }, py: 1,
                   cursor: 'pointer',
                   backdropFilter: 'blur(8px)',
                   transition: 'all 200ms ease',
@@ -193,7 +194,7 @@ function DashboardHero({ patient, navigate }) {
                 }}
               >
                 <a.icon sx={{ fontSize: 16, color: '#fff' }} />
-                <Typography sx={{ fontSize: 12.5, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap' }}>{a.label}</Typography>
+                <Typography sx={{ fontSize: { xs: 11.5, sm: 12.5 }, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap' }}>{a.label}</Typography>
               </Box>
             </motion.div>
           ))}
@@ -738,6 +739,7 @@ export default function Dashboard() {
                 <Button 
                   onClick={(e) => { e.stopPropagation(); navigate(`/hospitals/${h.id}`); }}
                   variant="contained" 
+                  fullWidth
                   sx={{ bgcolor: tokens.primary, color: '#fff', textTransform: 'none', borderRadius: 6, fontWeight: 600, py: 1.2, '&:hover': { bgcolor: tokens.primaryDark }, mb: 'auto' }}>
                   Select
                 </Button>
@@ -891,22 +893,22 @@ export default function Dashboard() {
                 <Box sx={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.6) 100%)',
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.7) 100%)',
                 }} />
                 {/* Overlay Content */}
-                <Box sx={{ position: 'absolute', top: 32, left: 32, right: 32 }}>
+                <Box sx={{ position: 'absolute', top: { xs: 16, sm: 32 }, left: { xs: 16, sm: 32 }, right: { xs: 16, sm: 32 } }}>
                   <Typography sx={{ 
                     color: '#fff', 
                     fontWeight: 800, 
-                    fontSize: { xs: 28, md: 36 }, 
-                    lineHeight: 1.2,
+                    fontSize: { xs: 20, sm: 26, md: 36 }, 
+                    lineHeight: 1.25,
                     maxWidth: 500,
-                    textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                    textShadow: '0 2px 10px rgba(0,0,0,0.4)'
                   }}>
                     {heroArticle.title}
                   </Typography>
                 </Box>
-                <Box sx={{ position: 'absolute', bottom: 32, left: 32 }}>
+                <Box sx={{ position: 'absolute', bottom: { xs: 16, sm: 32 }, left: { xs: 16, sm: 32 } }}>
                   <Button 
                     variant="contained" 
                     sx={{ 
@@ -914,8 +916,9 @@ export default function Dashboard() {
                       color: '#111827', 
                       fontWeight: 700, 
                       borderRadius: 100, 
-                      px: 3, 
-                      py: 1,
+                      px: { xs: 2, sm: 3 }, 
+                      py: { xs: 0.8, sm: 1 },
+                      fontSize: { xs: 12, sm: 14 },
                       textTransform: 'none',
                       '&:hover': { bgcolor: '#F3F4F6' }
                     }}
@@ -1023,7 +1026,7 @@ export default function Dashboard() {
       <Grid container spacing={2} sx={{ mt: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <SectionCard title="Your care team" arrow action={() => navigate('/family')}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 {doctors.slice(0, 4).map((d, i) => (
                   <Avatar key={d.id} src={d.photo}
@@ -1035,7 +1038,7 @@ export default function Dashboard() {
                 </Typography>
               </Box>
               <Button variant="outlined" size="small" endIcon={<ArrowForwardRoundedIcon />}
-                onClick={() => navigate('/family')} sx={{ fontWeight: 700 }}>
+                onClick={() => navigate('/family')} sx={{ fontWeight: 700, width: { xs: '100%', sm: 'auto' } }}>
                 Manage
               </Button>
             </Box>
@@ -1043,7 +1046,7 @@ export default function Dashboard() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ bgcolor: tokens.primary, border: 'none' }}>
-            <CardContent sx={{ p: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <CardContent sx={{ p: 2.5, display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
               <Box>
                 <Typography sx={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>Manage Family Health</Typography>
                 <Typography sx={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
@@ -1051,7 +1054,7 @@ export default function Dashboard() {
                 </Typography>
               </Box>
               <Button variant="contained"
-                sx={{ bgcolor: '#fff', color: tokens.primary, fontWeight: 700, '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' } }}
+                sx={{ bgcolor: '#fff', color: tokens.primary, fontWeight: 700, width: { xs: '100%', sm: 'auto' }, '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' } }}
                 startIcon={<AddCircleRoundedIcon />}
                 onClick={() => navigate('/family')}>
                 Add Member

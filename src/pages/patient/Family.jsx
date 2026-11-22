@@ -142,7 +142,9 @@ export default function Family() {
           <Card sx={{ bgcolor: tokens.surfaceMuted }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, textAlign: 'center' }}>
               <Typography sx={{ fontWeight: 800, fontSize: 28, color: tokens.textPrimary }}>2</Typography>
-              <Typography sx={{ fontSize: 12, fontWeight: 600, color: tokens.textSecondary }}>Active Family Plans</Typography>
+              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, fontWeight: 600, color: tokens.textSecondary }} noWrap>
+                Family Plans
+              </Typography>
             </CardContent>
           </Card>
         </Grid>

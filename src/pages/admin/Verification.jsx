@@ -136,8 +136,9 @@ export default function Verification() {
               </Typography>
             </Box>
           ) : (
-            <Table>
-              <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+            <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <Table sx={{ minWidth: 700 }}>
+                <TableHead sx={{ bgcolor: '#F9FAFB' }}>
                 <TableRow>
                   {(tab === 0
                     ? ['Doctor & Specialty', 'Hospital Affiliation', 'License No.', 'Experience', 'Status', 'Submitted', 'Actions']
@@ -259,17 +260,18 @@ export default function Verification() {
                 })}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
 
-      {/* Review Drawer */}
-      <Drawer
-        anchor="right"
-        open={Boolean(reviewRow)}
-        onClose={() => setReviewRow(null)}
-        PaperProps={{ sx: { width: 480, maxWidth: '100%' } }}
-      >
+    {/* Review Drawer */}
+    <Drawer
+      anchor="right"
+      open={Boolean(reviewRow)}
+      onClose={() => setReviewRow(null)}
+      PaperProps={{ sx: { width: { xs: '100%', sm: 480 }, maxWidth: '100%' } }}
+    >
         {reviewRow && (
           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Header */}

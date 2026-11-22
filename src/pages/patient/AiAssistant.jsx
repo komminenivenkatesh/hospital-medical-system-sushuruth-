@@ -62,7 +62,7 @@ function TypingDots() {
 export default function AiAssistant() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
   const [conversations, setConversations] = useState([]);
   const [activeConvId, setActiveConvId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -93,6 +93,7 @@ export default function AiAssistant() {
   const loadConversation = async (convId) => {
     setActiveConvId(convId);
     setTyping(false);
+    if (typeof window !== 'undefined' && window.innerWidth < 900) setSidebarOpen(false);
     try {
       const { data } = await aiAPI.getConversationById(convId);
       if (data.success && data.data) {
@@ -107,6 +108,7 @@ export default function AiAssistant() {
     setActiveConvId(null);
     setMessages([]);
     setInput('');
+    if (typeof window !== 'undefined' && window.innerWidth < 900) setSidebarOpen(false);
     inputRef.current?.focus();
   };
 
@@ -157,11 +159,30 @@ export default function AiAssistant() {
   const isEmpty = messages.length === 0;
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: '"Manrope", sans-serif' }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: '"Manrope", sans-serif', position: 'relative' }}>
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <Box
+          onClick={() => setSidebarOpen(false)}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            position: 'fixed',
+            inset: 0,
+            bgcolor: 'rgba(0,0,0,0.5)',
+            zIndex: 1200,
+          }}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <Box
         sx={{
           width: sidebarOpen ? SIDEBAR_W : 0,
+          position: { xs: 'fixed', md: 'relative' },
+          left: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: { xs: 1300, md: 1 },
           flexShrink: 0,
           overflow: 'hidden',
           bgcolor: '#111827',

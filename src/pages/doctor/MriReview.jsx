@@ -32,14 +32,19 @@ export default function MriReview() {
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 7 }}>
-          <Card><CardContent>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <ToggleButtonGroup orientation="vertical" exclusive value={tool} onChange={(e, v) => v && setTool(v)} size="small"
-                sx={{ '& .MuiToggleButton-root': { border: '1px solid #E5E7EB', mb: 0.5, borderRadius: '8px !important' } }}>
+          <Card><CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+              <ToggleButtonGroup exclusive value={tool} onChange={(e, v) => v && setTool(v)} size="small"
+                sx={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  flexDirection: { xs: 'row', sm: 'column' },
+                  '& .MuiToggleButton-root': { border: '1px solid #E5E7EB', mb: { xs: 0, sm: 0.5 }, mr: { xs: 0.5, sm: 0 }, borderRadius: '8px !important' } 
+                }}>
                 {tools.map((t) => { const Icon = t.icon; return <ToggleButton key={t.v} value={t.v}><Icon fontSize="small" /></ToggleButton>; })}
               </ToggleButtonGroup>
-              <Box sx={{ flex: 1, height: 420, bgcolor: '#0F172A', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <PsychologyOutlinedIcon sx={{ fontSize: 90, color: '#334155' }} />
+              <Box sx={{ flex: 1, height: { xs: 260, sm: 420 }, bgcolor: '#0F172A', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PsychologyOutlinedIcon sx={{ fontSize: { xs: 60, sm: 90 }, color: '#334155' }} />
               </Box>
             </Box>
           </CardContent></Card>
