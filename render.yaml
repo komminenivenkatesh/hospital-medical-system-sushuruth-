@@ -54,10 +54,8 @@ services:
   # ==========================================
   # 3. Frontend (React + Vite Static Site)
   # ==========================================
-  - type: web
+  - type: static
     name: sushuruth-frontend
-    runtime: static
-    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     headers:
